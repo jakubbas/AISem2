@@ -1,0 +1,48 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Numerics;
+using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
+
+public class Ball : MonoBehaviour, IBall
+{
+    private Rigidbody2D rb;
+
+    private float bouncePower = 50f;
+    // Start is called before the first frame update
+    void Start()
+    {
+        rb = this.GetComponent<Rigidbody2D>();
+
+    }
+
+    public void KickBall(Vector2 direction, float power)
+    {
+        Vector2 shotVector;
+        shotVector = Maths.Normalise(direction);
+        shotVector *= power;
+        rb.AddForce(shotVector);
+    }
+
+    public void GoalScored(int team)
+    {
+        Debug.Log("Goal Scored");
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //rb.velocity = Vector2.zero;
+        Vector2 bounceVector;
+        Debug.Log(collision.gameObject.transform);
+        float tempBouncePower = bouncePower;
+        if (!collision.gameObject.CompareTag("Wall"))
+        {
+            rb.velocity = Vector2.zero;
+            bounceVector = (-(Vector2)collision.gameObject.transform.position + (Vector2)gameObject.transform.position) * tempBouncePower;
+            rb.AddForce(bounceVector);
+        }
+
+
+    }
+
+}

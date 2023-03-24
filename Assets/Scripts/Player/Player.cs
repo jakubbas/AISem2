@@ -13,8 +13,20 @@ public class Player : MovingEntity
     public bool m_CanMoveWhileAttacking;
     bool m_Attacking;
 
+    private Rigidbody2D rb;
+
+    private float rotation;
+    private GameObject arrowPoint;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        arrowPoint = GameObject.Find("ArrowPoint");
+    }
     void Update()
     {
+        rotation = Quaternion.LookRotation((Vector2)rb.velocity, Vector2.up).normalized.z * 360;
+        arrowPoint.transform.rotation = new Quaternion(0,0, rotation, 1);
         m_Horizontal = Input.GetAxis("Horizontal");
         m_Vertical = Input.GetAxis("Vertical");
         
@@ -63,20 +75,26 @@ public class Player : MovingEntity
     {
         Entity ent = collision.GetComponent<Entity>();
 
-        if (ent)
+
+        if (collision.gameObject.TryGetComponent(out IBall ball))
         {
-            ent.TakeDamage(m_AttackPower);
+            ball.KickBall(-(Vector2)transform.position + (Vector2)collision.gameObject.transform.position, 500f);
         }
+
+        //if (ent)
+        //{
+        //    ent.TakeDamage(m_AttackPower);
+        //}
     }
 
 	private void OnCollisionEnter2D(Collision2D collision)
 	{
 		Entity ent = collision.gameObject.GetComponent<Entity>();
 
-		if (ent)
-		{
-			TakeDamage(ent.m_AttackPower);
-		}
+		if (collision.gameObject.TryGetComponent(out IBall ball))
+        {
+
+        }
 	}
 
 	protected override Vector2 GenerateVelocity()
