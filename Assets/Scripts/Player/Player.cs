@@ -1,9 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 
 public class Player : MovingEntity
 {
+    private GameObject ownGoal;
+    private GameObject enemyGoal;
+
+
+    [SerializeField] private float kickPower;
+    [SerializeField] private int teamNumber;
     public float m_Acceleration;
 
     //input
@@ -18,57 +26,158 @@ public class Player : MovingEntity
     private float rotation;
     private GameObject arrowPoint;
 
+    private Vector2 posToLookAt;
+
+    private enum TeamState
+    {
+        Defense,
+        Attack
+    }
+
+    void Defense()
+    {
+
+    }
+
+    void Attack()
+    {
+
+    }
+
+    private enum PlayerState
+    {
+        Defend,
+        Pass,
+        Run,
+        GetOpen,
+        Strike
+    }
+
+    void Defend()
+    {
+
+    }
+
+    void Pass()
+    {
+
+    }
+    void Run()
+    {
+
+    }
+
+    void GetOpen()
+    {
+
+    }
+
+    void Strike()
+    {
+
+    }
+
     void Start()
     {
+        foreach (GameObject goal in GameObject.FindGameObjectsWithTag("Goal"))
+        {
+            if (goal.TryGetComponent(out GoalNet net))
+            {
+                if (net.goalTeamNumber == teamNumber)
+                {
+                    ownGoal = goal;
+                }
+                else
+                {
+                    enemyGoal = goal;
+                }
+            }
+        }
+
         rb = GetComponent<Rigidbody2D>();
         arrowPoint = GameObject.Find("ArrowPoint");
     }
+
+    float ArrowDirection(Vector2 direction)
+    {
+        float angle = Mathf.Atan2(direction.y, direction.x);
+        angle = 180 * angle/Mathf.PI;
+        return angle;
+        //return (360 + Mathf.Round(angle)) % 360; //round number, avoid decimal fragments
+    }
+
+    float getAngleLookAt()
+    {
+        Vector2 tempPosToLookAt = posToLookAt;
+
+        tempPosToLookAt -= (Vector2)transform.position;
+        float angle = Mathf.Atan2(tempPosToLookAt.y, tempPosToLookAt.x) * Mathf.Rad2Deg;
+        return angle;
+        
+    }
+
+    float getAngle()
+    {
+        Vector2 tempPosToLookAt = posToLookAt;
+        tempPosToLookAt -= (Vector2)transform.position;
+        float angle = Mathf.Atan2(tempPosToLookAt.y, tempPosToLookAt.x);
+        return angle;
+    }
+
+
     void Update()
     {
-        rotation = Quaternion.LookRotation((Vector2)rb.velocity, Vector2.up).normalized.z * 360;
-        arrowPoint.transform.rotation = new Quaternion(0,0, rotation, 1);
+        posToLookAt = (Vector2)GameObject.Find("Ball").transform.position;
+
+        //rotates player and arrow
+        arrowPoint.transform.rotation = Quaternion.Euler(new  Vector3(0, 0, getAngleLookAt() - 90));
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, getAngleLookAt() - 90));
+
         m_Horizontal = Input.GetAxis("Horizontal");
         m_Vertical = Input.GetAxis("Vertical");
-        
-        if(Input.GetKeyDown(KeyCode.Space))
-		{
-            m_Animator.SetTrigger("Attack");
-            m_Attacking = true;
+
+        bool IsInRange(float value, float minRotation, float maxRotation)
+        {
+            if (value > minRotation && value < maxRotation)
+                return true;
+            else
+                return false;  
+            
         }
 
         if (!m_Attacking || (m_Attacking && m_CanMoveWhileAttacking))
         {
-            //up
-            if (m_Vertical > 0)
-            {
-                m_Animator.SetInteger("Direction", 0);
-            }
-            //right
-            else if (m_Horizontal > 0)
-            {
-                m_Animator.SetInteger("Direction", 1);
-            }
-            //down
-            else if (m_Vertical < 0)
-            {
-                m_Animator.SetInteger("Direction", 2);
-            }
-            //left
-            else if (m_Horizontal < 0)
-            {
-                m_Animator.SetInteger("Direction", 3);
-            }
-            //idle
-            else
-            {
-                m_Animator.SetInteger("Direction", -1);
-            }
+            ////up
+            //if (IsInRange(transform.rotation.z, -45, 45))
+            //{
+            //    m_Animator.SetInteger("Direction", 0);
+            //}
+            ////right
+            //else if (IsInRange(transform.rotation.z, -135, -45))
+            //{
+            //    m_Animator.SetInteger("Direction", 1);
+            //}
+            ////down
+            //else if (IsInRange(transform.rotation.z, -135, -45))
+            //{
+            //    m_Animator.SetInteger("Direction", 2);
+            //}
+            ////left
+            //else if (IsInRange(transform.rotation.z, -135, -45))
+            //{
+            //    m_Animator.SetInteger("Direction", 3);
+            //}
+            ////idle
+            //else
+            //{
+            //    m_Animator.SetInteger("Direction", -1);
+            //}
         }
     }
 
     public void StopAttack()
 	{
-        m_Attacking = false;
+
 	}
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -78,7 +187,7 @@ public class Player : MovingEntity
 
         if (collision.gameObject.TryGetComponent(out IBall ball))
         {
-            ball.KickBall(-(Vector2)transform.position + (Vector2)collision.gameObject.transform.position, 500f);
+            ball.KickBall(-(Vector2)transform.position + (Vector2)collision.gameObject.transform.position, kickPower, gameObject);
         }
 
         //if (ent)

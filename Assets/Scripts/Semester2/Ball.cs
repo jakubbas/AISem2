@@ -9,15 +9,17 @@ public class Ball : MonoBehaviour, IBall
     private Rigidbody2D rb;
 
     private float bouncePower = 50f;
+
+    private GameObject lastPlayerToTouch;
     // Start is called before the first frame update
     void Start()
     {
         rb = this.GetComponent<Rigidbody2D>();
-
     }
 
-    public void KickBall(Vector2 direction, float power)
+    public void KickBall(Vector2 direction, float power, GameObject lastTouchPlayer)
     {
+        lastPlayerToTouch = lastTouchPlayer;
         Vector2 shotVector;
         shotVector = Maths.Normalise(direction);
         shotVector *= power;
@@ -26,11 +28,15 @@ public class Ball : MonoBehaviour, IBall
 
     public void GoalScored(int team)
     {
-        Debug.Log("Goal Scored");
+        Debug.Log("Goal Scored by : " + lastPlayerToTouch);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            lastPlayerToTouch = collision.gameObject;
+        }
         //rb.velocity = Vector2.zero;
         Vector2 bounceVector;
         Debug.Log(collision.gameObject.transform);
