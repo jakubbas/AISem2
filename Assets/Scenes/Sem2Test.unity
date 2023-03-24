@@ -12434,7 +12434,7 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!1001 &1232230025
+--- !u!1001 &1162683374
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -12442,29 +12442,21 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 8444165410975509857, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 6200000, guid: e48dd8420d2ee4d41aff019bc3709382, type: 2}
     - target: {fileID: 8444165410975509859, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_Name
       value: Ball
       objectReference: {fileID: 0}
-    - target: {fileID: 8444165410975509862, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
-      propertyPath: m_Mass
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.42242718
+      value: -3.04
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.79
+      value: 0.1874628
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.z
@@ -12514,12 +12506,16 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.49
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.z
@@ -14794,6 +14790,11 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!1 &1808924643 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8444165410975509859, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
+  m_PrefabInstance: {fileID: 1162683374}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1188434758256148804
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14804,15 +14805,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5.5
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 7.59
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalPosition.z
@@ -14845,6 +14850,10 @@ PrefabInstance:
     - target: {fileID: 1188434757385644506, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1188434757385644507, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
+      propertyPath: goalTeamNumber
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757385644511, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_Name
@@ -14981,7 +14990,6 @@ GameObject:
   - component: {fileID: 7419045902178294822}
   - component: {fileID: 7419045902178294821}
   - component: {fileID: 7419045902178294820}
-  - component: {fileID: 7419045902178294819}
   m_Layer: 11
   m_Name: FootballPlayer
   m_TagString: Player
@@ -15076,35 +15084,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_MaxHealth: 5
-  m_CurrentHealth: 0
+  m_CurrentHealth: 5
   m_AttackPower: 2
-  m_MaxSpeed: 5
+  m_MaxSpeed: 10
   m_Mass: 1
   m_RotatesBasedOnVelocity: 0
   m_FlipsBasedOnVelocity: 0
-  kickPower: 400
+  kickAimTimer: 1.5
+  ball: {fileID: 1808924643}
+  kickPower: 500
   teamNumber: 0
   detectionRadius: 50
---- !u!114 &7419045902178294819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2123130924516719863}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db8540f8d08eb5d459b81b41612a1e9e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Debug_ShowDebugLines: 0
-  m_Debug_DesiredVelocityColour: {r: 0, g: 0, b: 1, a: 1}
-  m_Debug_CurrentVelocityColour: {r: 0, g: 1, b: 0, a: 1}
-  m_Debug_SteeringColour: {r: 1, g: 0, b: 0, a: 1}
-  m_Active: 1
-  m_Weight: 5
-  m_EvadingEntity: {fileID: 0}
-  m_EvadeRadius: 0
 --- !u!114 &7419045902178294820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15121,7 +15111,7 @@ MonoBehaviour:
   m_Debug_DesiredVelocityColour: {r: 0, g: 0, b: 1, a: 1}
   m_Debug_CurrentVelocityColour: {r: 0, g: 1, b: 0, a: 1}
   m_Debug_SteeringColour: {r: 1, g: 0, b: 0, a: 1}
-  m_Active: 1
+  m_Active: 0
   m_Weight: 5
   m_PursuingEntity: {fileID: 0}
 --- !u!114 &7419045902178294821
@@ -15141,7 +15131,7 @@ MonoBehaviour:
   m_Debug_CurrentVelocityColour: {r: 0, g: 1, b: 0, a: 1}
   m_Debug_SteeringColour: {r: 1, g: 0, b: 0, a: 1}
   m_Active: 1
-  m_Weight: 5
+  m_Weight: 10
   m_TargetPosition: {x: 0, y: 0}
 --- !u!114 &7419045902178294822
 MonoBehaviour:
@@ -15159,7 +15149,7 @@ MonoBehaviour:
   m_Debug_DesiredVelocityColour: {r: 0, g: 0, b: 1, a: 1}
   m_Debug_CurrentVelocityColour: {r: 0, g: 1, b: 0, a: 1}
   m_Debug_SteeringColour: {r: 1, g: 0, b: 0, a: 1}
-  m_Active: 1
+  m_Active: 0
   m_Weight: 5
   m_TargetPosition: {x: 0, y: 0}
   m_SlowingRadius: 0
@@ -15177,4 +15167,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MaxForce: 100
   m_RemainingForce: 0
-  m_SteeringBehaviours: []
+  m_SteeringBehaviours:
+  - {fileID: 7419045902178294822}
+  - {fileID: 7419045902178294821}
+  - {fileID: 7419045902178294820}

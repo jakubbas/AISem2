@@ -11,6 +11,8 @@ public class Ball : MonoBehaviour, IBall
     private float bouncePower = 50f;
 
     private GameObject lastPlayerToTouch;
+
+    [HideInInspector] public GameObject possessingPlayer;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,11 +21,14 @@ public class Ball : MonoBehaviour, IBall
 
     public void KickBall(Vector2 direction, float power, GameObject lastTouchPlayer)
     {
+        possessingPlayer = null;
         lastPlayerToTouch = lastTouchPlayer;
         Vector2 shotVector;
         shotVector = Maths.Normalise(direction);
         shotVector *= power;
         rb.AddForce(shotVector);
+        this.transform.parent = null;
+
     }
 
     public void GoalScored(int team)
@@ -50,5 +55,25 @@ public class Ball : MonoBehaviour, IBall
 
 
     }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (possessingPlayer == null)
+            {
+                CaptureBall(collision.gameObject);
+            }
+        }
+    }
+
+
+    public void CaptureBall(GameObject player)
+    {
+        lastPlayerToTouch = player;
+        player.TryGetComponent(out IPlayer ballref);
+        ballref.SetBallPossessed();
+        this.transform.parent = player.transform;
+    }
+
 
 }

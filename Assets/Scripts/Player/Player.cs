@@ -28,6 +28,10 @@ public class Player : MovingEntity
 
     private Vector2 posToLookAt;
 
+
+   
+
+
     private enum TeamState
     {
         Defense,
