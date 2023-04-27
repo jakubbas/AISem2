@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class FootBallAgent : MovingEntity, IPlayer
 {
+    //ui
+    private TextMesh playerStateText;
+
+
+
     //timers
 
     private float timer;
@@ -62,6 +67,8 @@ public class FootBallAgent : MovingEntity, IPlayer
         rb = GetComponent<Rigidbody2D>();
         arrowPoint = GameObject.Find("ArrowPoint");
 
+        playerStateText = this.GetComponentInChildren<TextMesh>();
+
 
         if (!m_SteeringBehaviours)
             Debug.LogError("Object doesn't have a Steering Behaviour Manager attached", this);
@@ -72,8 +79,8 @@ public class FootBallAgent : MovingEntity, IPlayer
         if (!m_Seek)
             Debug.LogError("Object doesn't have a Steering Behaviour Seek attached", this);
 
-
         timer = kickAimTimer;
+
 
     }
 
@@ -101,13 +108,14 @@ public class FootBallAgent : MovingEntity, IPlayer
         m_Pursuit.m_Active = false;
         m_Seek.m_Active = false;
 
+
+
     }
     // Update is called once per frame
 
     float getAngleLookAt()
     {
         Vector2 tempPosToLookAt = posToLookAt;
-
         tempPosToLookAt -= (Vector2)transform.position;
         float angle = Mathf.Atan2(tempPosToLookAt.y, tempPosToLookAt.x) * Mathf.Rad2Deg;
         return angle;
@@ -117,7 +125,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     protected override void FixedUpdate()
     {
         base.FixedUpdate();
-
+        playerStateText.text = currentPlayerState.ToString();
         switch (currentPlayerState)
         {
             case PlayerState.Defend:
@@ -194,7 +202,6 @@ public class FootBallAgent : MovingEntity, IPlayer
     void Attack()
     {
         //When the player team gets possession of the ball.
-
     }
 
     private PlayerState currentPlayerState;
@@ -234,6 +241,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Strike()
     {
+        //Actually kicking the ball at a goal to score.
         LookAtDirection(enemyGoal.transform.position);
         timer -= Time.deltaTime;
         if (timer <= 0)
@@ -247,6 +255,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void GetBall()
     {
+        //Tells the agent to run at the ball to get possession.
         m_Seek.m_Active = true;
         m_Seek.m_TargetPosition = (Vector2)ball.transform.position;
         if (hasBall)
@@ -272,6 +281,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Kick(Vector2 direction,float kickPower)
     {
+        //Only handles kicking the ball in a provided direction and power.
         if (ball.TryGetComponent(out IBall ballref))
         {
             ballref.KickBall(direction, kickPower, this.gameObject);
