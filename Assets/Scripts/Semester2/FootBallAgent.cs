@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class FootBallAgent : MovingEntity, IPlayer
@@ -16,6 +17,9 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     private GameObject ownGoal;
     private GameObject enemyGoal;
+
+    private FootBallAgent markAgent;
+
     public GameObject ball;
     private bool hasBall = false;
 
@@ -31,7 +35,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     bool m_Attacking;
 
-
     //
 
     SteeringBehaviour_Manager m_SteeringBehaviours;
@@ -43,7 +46,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     public float detectionRadius;
     private bool playerWithinRadius = false;
 
-
+    //Interfaces
     public void SetBallPossessed()
     {
         hasBall = true;
@@ -59,6 +62,14 @@ public class FootBallAgent : MovingEntity, IPlayer
         return teamNumber;
     }
 
+    public void SetMarkAgent(FootBallAgent newMark)
+    {
+        markAgent = newMark;
+        Debug.Log("New mark: ");
+        Debug.Log(markAgent.name);
+    }
+
+    //End
 
     protected override void Awake()
     {
@@ -98,9 +109,9 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         foreach (GameObject goal in GameObject.FindGameObjectsWithTag("Goal"))
         {
-            if (goal.TryGetComponent(out GoalNet net))
+            if (goal.TryGetComponent(out IGoalNet IGoalNet))
             {
-                if (net.goalTeamNumber == teamNumber)
+                if (IGoalNet.GetGoalNetType().teamNumber == teamNumber)
                 {
                     ownGoal = goal;
                 }
@@ -110,7 +121,6 @@ public class FootBallAgent : MovingEntity, IPlayer
                 }
             }
         }
-        m_Evade.m_Active = false;
         m_Pursuit.m_Active = false;
         m_Seek.m_Active = false;
 
@@ -271,9 +281,9 @@ public class FootBallAgent : MovingEntity, IPlayer
     void Kick(Vector2 direction,float kickPower)
     {
         //Only handles kicking the ball in a provided direction and power.
-        if (ball.TryGetComponent(out IBall ballref))
+        if (ball.TryGetComponent(out IBall IBall))
         {
-            ballref.KickBall(direction, kickPower, this.gameObject);
+            IBall.KickBall(direction, kickPower, this.gameObject);
             hasBall = false;
         }
     }

@@ -31,11 +31,6 @@ public class Ball : MonoBehaviour, IBall
 
     }
 
-    public void GoalScored(int team)
-    {
-        Debug.Log("Goal Scored by : " + lastPlayerToTouch);
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
@@ -75,5 +70,9 @@ public class Ball : MonoBehaviour, IBall
         this.transform.parent = player.transform;
     }
 
+    public Ball GetBallType()
+    {
+        return this;
+    }
 
 }

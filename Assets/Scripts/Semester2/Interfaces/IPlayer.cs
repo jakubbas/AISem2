@@ -4,9 +4,11 @@ using UnityEngine;
 
 public interface IPlayer
 {
-    public void SetBallPossessed();
+    void SetBallPossessed();
 
-    public FootBallAgent GetFootBallAgentType();
+    FootBallAgent GetFootBallAgentType();
 
-    public int GetFootBallAgentTeamID();
+    int GetFootBallAgentTeamID();
+
+    void SetMarkAgent(FootBallAgent newMark);
 }

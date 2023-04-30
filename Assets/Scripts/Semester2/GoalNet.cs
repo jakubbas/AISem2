@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class GoalNet : MonoBehaviour
+public class GoalNet : MonoBehaviour, IGoalNet
 {
-    [SerializeField] public int goalTeamNumber;
+    [SerializeField] public int teamNumber;
 
     // Start is called before the first frame update
     void Start()
@@ -17,8 +17,17 @@ public class GoalNet : MonoBehaviour
     {
         if (collision.gameObject.TryGetComponent(out IBall ball))
         {
-            ball.GoalScored(goalTeamNumber);
+
         }
     }
 
+    public void GoalScored(int teamNumber)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public GoalNet GetGoalNetType()
+    {
+        return this;
+    }
 }

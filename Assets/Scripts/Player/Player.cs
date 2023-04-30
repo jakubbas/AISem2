@@ -87,7 +87,7 @@ public class Player : MovingEntity
         {
             if (goal.TryGetComponent(out GoalNet net))
             {
-                if (net.goalTeamNumber == teamNumber)
+                if (net.teamNumber == teamNumber)
                 {
                     ownGoal = goal;
                 }

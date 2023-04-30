@@ -6,8 +6,9 @@ public interface IBall
 {
     void KickBall(Vector2 direction, float power, GameObject playerToKick);
 
-    void GoalScored(int team);
-
     void CaptureBall(GameObject player);
+
+    Ball GetBallType();
+
 
 }
