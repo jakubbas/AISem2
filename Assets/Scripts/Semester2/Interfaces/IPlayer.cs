@@ -6,4 +6,7 @@ public interface IPlayer
 {
     public void SetBallPossessed();
 
+    public FootBallAgent GetFootBallAgentType();
+
+    public int GetFootBallAgentTeamID();
 }

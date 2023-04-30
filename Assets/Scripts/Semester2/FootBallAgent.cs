@@ -6,17 +6,14 @@ public class FootBallAgent : MovingEntity, IPlayer
 {
     //ui
     private TextMesh playerStateText;
-
-
-
     //timers
 
     private float timer;
 
     public float kickAimTimer = 1.5f;
 
-
     //
+
     private GameObject ownGoal;
     private GameObject enemyGoal;
     public GameObject ball;
@@ -50,6 +47,16 @@ public class FootBallAgent : MovingEntity, IPlayer
     public void SetBallPossessed()
     {
         hasBall = true;
+    }
+
+    public FootBallAgent GetFootBallAgentType()
+    {
+        return this;
+    }
+
+    public int GetFootBallAgentTeamID()
+    {
+        return teamNumber;
     }
 
 
@@ -87,7 +94,6 @@ public class FootBallAgent : MovingEntity, IPlayer
     protected void Start()
     {
         //ball = GameObject.FindGameObjectWithTag("Ball");
-        currentTeamState = TeamState.Attack;
         posToLookAt = ball.transform.position;
 
         foreach (GameObject goal in GameObject.FindGameObjectsWithTag("Goal"))
@@ -113,7 +119,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     }
     // Update is called once per frame
 
-    float getAngleLookAt()
+    float GetAngleLookAt()
     {
         Vector2 tempPosToLookAt = posToLookAt;
         tempPosToLookAt -= (Vector2)transform.position;
@@ -150,8 +156,8 @@ public class FootBallAgent : MovingEntity, IPlayer
                 break;
         }
 
-        arrowPoint.transform.rotation = Quaternion.Euler(new Vector3(0, 0, getAngleLookAt() - 90));
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, getAngleLookAt() - 90));
+        arrowPoint.transform.rotation = Quaternion.Euler(new Vector3(0, 0, GetAngleLookAt() - 90));
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, GetAngleLookAt() - 90));
 
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -185,23 +191,6 @@ public class FootBallAgent : MovingEntity, IPlayer
     protected override Vector2 GenerateVelocity()
     {
         return m_SteeringBehaviours.GenerateSteeringForce();
-    }
-
-    private TeamState currentTeamState;
-    private enum TeamState
-    {
-        Defense,
-        Attack
-    }
-
-    void Defense()
-    {
-        //When the enemy team has possession of the ball.
-    }
-
-    void Attack()
-    {
-        //When the player team gets possession of the ball.
     }
 
     private PlayerState currentPlayerState;
@@ -286,22 +275,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         {
             ballref.KickBall(direction, kickPower, this.gameObject);
             hasBall = false;
-        }
-    }
-
-    private void SwitchTeamState(TeamState newState)
-    {
-        currentTeamState = newState;
-
-        switch (currentTeamState)
-        {
-            case TeamState.Attack:
-                break;
-            case TeamState.Defense:
-                break;
-            default:
-                break;
-
         }
     }
 
