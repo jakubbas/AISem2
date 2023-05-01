@@ -6,6 +6,7 @@ using UnityEngine;
 public class GoalNet : MonoBehaviour, IGoalNet
 {
     [SerializeField] public int teamNumber;
+    public GameObject[] aimTargets = new GameObject[4];
 
     // Start is called before the first frame update
     void Start()
@@ -29,5 +30,10 @@ public class GoalNet : MonoBehaviour, IGoalNet
     public GoalNet GetGoalNetType()
     {
         return this;
+    }
+
+    public GameObject[] GetAimTargets()
+    {
+        return aimTargets;
     }
 }

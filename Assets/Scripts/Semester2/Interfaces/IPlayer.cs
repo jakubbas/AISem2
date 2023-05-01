@@ -11,4 +11,6 @@ public interface IPlayer
     int GetFootBallAgentTeamID();
 
     void SetMarkAgent(FootBallAgent newMark);
+
+    GameObject GetBallHolder();
 }

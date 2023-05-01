@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1188434757385644505}
   - component: {fileID: 1188434757385644504}
   - component: {fileID: 1188434757385644507}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Goal 2
   m_TagString: Goal
   m_Icon: {fileID: 0}
@@ -38,7 +38,7 @@ Transform:
   - {fileID: 1188434758210801084}
   - {fileID: 1188434758664538525}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1188434757385644505
 SpriteRenderer:
@@ -131,6 +131,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teamNumber: 0
+  aimTargets:
+  - {fileID: 1188434757424702441}
+  - {fileID: 1188434758473344424}
+  - {fileID: 1188434758210801075}
+  - {fileID: 1188434758664538524}
 --- !u!1 &1188434757424702441
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,7 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188434757424702442}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Score0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -173,7 +178,7 @@ GameObject:
   - component: {fileID: 1188434757698281210}
   - component: {fileID: 1188434757698281092}
   - component: {fileID: 1188434757698281211}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GoalPostL
   m_TagString: Wall
   m_Icon: {fileID: 0}
@@ -282,7 +287,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188434758210801084}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Score2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -313,7 +318,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188434758473344425}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Score1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -344,7 +349,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188434758664538525}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Score3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -377,7 +382,7 @@ GameObject:
   - component: {fileID: 1188434758732667863}
   - component: {fileID: 1188434758732667857}
   - component: {fileID: 1188434758732667856}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GoalPostR
   m_TagString: Wall
   m_Icon: {fileID: 0}

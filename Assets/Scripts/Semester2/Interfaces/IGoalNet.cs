@@ -8,7 +8,7 @@ public interface IGoalNet
 
     GoalNet GetGoalNetType();
 
-
+    GameObject[] GetAimTargets();
 
 
 }

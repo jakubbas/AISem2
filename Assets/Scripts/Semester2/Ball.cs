@@ -65,9 +65,9 @@ public class Ball : MonoBehaviour, IBall
     public void CaptureBall(GameObject player)
     {
         lastPlayerToTouch = player;
-        player.TryGetComponent(out IPlayer ballref);
-        ballref.SetBallPossessed();
-        this.transform.parent = player.transform;
+        player.TryGetComponent(out IPlayer IPlayer);
+        IPlayer.SetBallPossessed();
+        this.transform.parent = IPlayer.GetBallHolder().transform;
     }
 
     public Ball GetBallType()

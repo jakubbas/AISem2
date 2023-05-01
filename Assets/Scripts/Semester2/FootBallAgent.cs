@@ -15,6 +15,8 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     //
 
+    public GameObject ballHolder;
+
     private GameObject ownGoal;
     private GameObject enemyGoal;
 
@@ -65,8 +67,12 @@ public class FootBallAgent : MovingEntity, IPlayer
     public void SetMarkAgent(FootBallAgent newMark)
     {
         markAgent = newMark;
-        Debug.Log("New mark: ");
-        Debug.Log(markAgent.name);
+        Debug.Log("New mark: " + markAgent.name);
+    }
+
+    public GameObject GetBallHolder()
+    {
+        return ballHolder;
     }
 
     //End
@@ -98,8 +104,6 @@ public class FootBallAgent : MovingEntity, IPlayer
             Debug.LogError("Object doesn't have a Steering Behaviour Seek attached", this);
 
         timer = kickAimTimer;
-
-
     }
 
     protected void Start()
@@ -123,8 +127,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         }
         m_Pursuit.m_Active = false;
         m_Seek.m_Active = false;
-
-
 
     }
     // Update is called once per frame
@@ -167,7 +169,7 @@ public class FootBallAgent : MovingEntity, IPlayer
         }
 
         arrowPoint.transform.rotation = Quaternion.Euler(new Vector3(0, 0, GetAngleLookAt() - 90));
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, GetAngleLookAt() - 90));
+        //transform.rotation = Quaternion.Euler(new Vector3(0, 0, GetAngleLookAt() - 90));
 
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -245,29 +247,99 @@ public class FootBallAgent : MovingEntity, IPlayer
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
-            Kick(posToLookAt, kickPower * 1.5f);
+            //Gets the targets from the opponent goal.
+            enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
+            GameObject[] targets = IGoalNet.GetAimTargets();
+            List<GameObject> openTargets = new List<GameObject>();
+
+            //For each target
+            for (int i = 0; i < targets.Length; i++)
+            {
+                Debug.Log((Vector2)targets[i].transform.position);
+                //Check if there is nothing between the player and each target.
+                if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
+                {
+                    openTargets.Add(targets[i]);
+                }
+            }
+
+            //If every target is hidden away.
+            if (openTargets.Count == 0)
+            {
+                Debug.Log("No valid target to strike.");
+            }
+            //If there is an available target, pick a random one and strike.
+            else
+            {
+                
+                Kick(posToLookAt, kickPower * 1.5f);
+            }
+
             SwitchPlayerState(PlayerState.Run);
             timer = kickAimTimer;
         }
         //Choose one of the 4 spots on the goal which aren't covered by an enemy player. Position yourself behind the ball in that direction, and kick().
     }
 
+    bool RaycastIsTargetOpen(GameObject expectedHit, Vector2 direction)
+    {
+        RaycastHit2D hit;
+        //Raycasts to the target, and if the raycast hits the target, returns true. Works on gameplay layer only.
+        hit = Physics2D.BoxCast((Vector2)transform.position, new Vector2(1, 1), 0, direction, LayerMask.GetMask("Gameplay"));
+        Debug.DrawRay((Vector2)transform.position, direction * 1000, Color.red, 3, false);
+        if (hit.transform.gameObject == expectedHit)
+        {
+            return true;
+        }
+
+
+        Debug.Log("Strike obstructed by: " + hit.transform.gameObject);
+        return false;
+    }
+
+
+
     void GetBall()
     {
         //Tells the agent to run at the ball to get possession.
-        m_Seek.m_Active = true;
-        m_Seek.m_TargetPosition = (Vector2)ball.transform.position;
+        ArriveToPosition((Vector2)ball.transform.position);
         if (hasBall)
         {
+            DisableAllMovement();
             Debug.Log("HAS BALL");
-            m_Seek.m_Active = false;
             SwitchPlayerState(PlayerState.Strike);
         }
     }
 
-    void MoveToPosition(Vector2 position)
+    void DisableAllMovement()
+    {
+        m_Seek.m_Active = false;
+        m_Pursuit.m_Active = false;
+        m_Arrive.m_Active=false;
+    }
+
+    void SeekToPosition(Vector2 position)
     {
         //Actually handles seeking to specific locations. Other states will call this.
+        m_Seek.m_TargetPosition = position;
+        m_Seek.m_Active = true;
+        if (Maths.Magnitude((Vector2)transform.position - m_Seek.m_TargetPosition) < 0.1f)
+        {
+            Debug.Log("Reached Seek Position");
+            m_Seek.m_Active = false;
+        }    
+
+    }
+    void ArriveToPosition(Vector2 position)
+    {
+        //Actually handles seeking to specific locations. Other states will call this.
+        m_Arrive.m_TargetPosition = position;
+        m_Arrive.m_Active = true;
+        if (Maths.Magnitude((Vector2)transform.position - m_Arrive.m_TargetPosition) < 0.1f)
+        {
+            Debug.Log("Reached Seek Position");
+            m_Arrive.m_Active = false;
+        }
 
     }
 
