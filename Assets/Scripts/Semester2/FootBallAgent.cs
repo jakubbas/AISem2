@@ -242,6 +242,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Strike()
     {
+        Debug.Log("here");
         //Actually kicking the ball at a goal to score.
         LookAtDirection(enemyGoal.transform.position);
         timer -= Time.deltaTime;
@@ -255,10 +256,10 @@ public class FootBallAgent : MovingEntity, IPlayer
             //For each target
             for (int i = 0; i < targets.Length; i++)
             {
-                Debug.Log((Vector2)targets[i].transform.position);
                 //Check if there is nothing between the player and each target.
                 if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
                 {
+                    Debug.Log("121312");
                     openTargets.Add(targets[i]);
                 }
             }
@@ -271,7 +272,6 @@ public class FootBallAgent : MovingEntity, IPlayer
             //If there is an available target, pick a random one and strike.
             else
             {
-                
                 Kick(posToLookAt, kickPower * 1.5f);
             }
 
@@ -285,15 +285,15 @@ public class FootBallAgent : MovingEntity, IPlayer
     {
         RaycastHit2D hit;
         //Raycasts to the target, and if the raycast hits the target, returns true. Works on gameplay layer only.
-        hit = Physics2D.BoxCast((Vector2)transform.position, new Vector2(1, 1), 0, direction, LayerMask.GetMask("Gameplay"));
-        Debug.DrawRay((Vector2)transform.position, direction * 1000, Color.red, 3, false);
+        hit = Physics2D.BoxCast((Vector2)transform.position, new Vector2(1, 1), 0, (direction - (Vector2)transform.position), LayerMask.GetMask("Gameplay"));
+        Debug.DrawRay((Vector2)transform.position, (direction - (Vector2)transform.position).normalized * 1000, Color.red, 3, false);
         if (hit.transform.gameObject == expectedHit)
         {
             return true;
         }
 
 
-        Debug.Log("Strike obstructed by: " + hit.transform.gameObject);
+        Debug.Log("Strike obstructed by: " + hit.transform.gameObject.name);
         return false;
     }
 
