@@ -9,9 +9,11 @@ public class FootBallAgent : MovingEntity, IPlayer
     private TextMesh playerStateText;
     //timers
 
-    private float timer;
 
+
+    private float kickAimTimerTemp;
     public float kickAimTimer = 1.5f;
+
 
     //
 
@@ -103,7 +105,7 @@ public class FootBallAgent : MovingEntity, IPlayer
         if (!m_Seek)
             Debug.LogError("Object doesn't have a Steering Behaviour Seek attached", this);
 
-        timer = kickAimTimer;
+        kickAimTimerTemp = kickAimTimer;
     }
 
     protected void Start()
@@ -178,27 +180,7 @@ public class FootBallAgent : MovingEntity, IPlayer
             m_Attacking = true;
         }
 
-        //DetectionCheck();
-
-
     }
-
-    //private void DetectionCheck()
-    //{
-    //    float distanceToPlayer;
-
-    //    distanceToPlayer = Mathf.Abs(Maths.Magnitude((Vector2)transform.position - (Vector2)m_Pursuit.m_PursuingEntity.gameObject.transform.position));
-
-    //    if (distanceToPlayer <= detectionRadius)
-    //    {
-    //        playerWithinRadius = true;
-    //    }
-
-    //    else
-    //    {
-    //        playerWithinRadius = false;
-    //    }
-    //}
 
     protected override Vector2 GenerateVelocity()
     {
@@ -218,13 +200,14 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Defend()
     {
+
+
         //Seek to position between the enemy player and your goal, and try to stay in that pocket. Slightly in front of the offensive player, will depend on stats.
     }
 
     void Pass()
     {
         //Find a position to pass to.
-        //Move the behind the ball on the same line as that position, and then Kick().
         //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed.
         //Will need a reference to the teammate and their defender.
 
@@ -242,11 +225,8 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Strike()
     {
-        Debug.Log("here");
         //Actually kicking the ball at a goal to score.
-        LookAtDirection(enemyGoal.transform.position);
-        timer -= Time.deltaTime;
-        if (timer <= 0)
+        if (kickAimTimerTemp == kickAimTimer)
         {
             //Gets the targets from the opponent goal.
             enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
@@ -259,7 +239,6 @@ public class FootBallAgent : MovingEntity, IPlayer
                 //Check if there is nothing between the player and each target.
                 if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
                 {
-                    Debug.Log("121312");
                     openTargets.Add(targets[i]);
                 }
             }
@@ -269,16 +248,27 @@ public class FootBallAgent : MovingEntity, IPlayer
             {
                 Debug.Log("No valid target to strike.");
             }
+
             //If there is an available target, pick a random one and strike.
             else
             {
-                Kick(posToLookAt, kickPower * 1.5f);
-            }
+                int randomIndex;
+                randomIndex = Random.Range(0, openTargets.Count);
+                LookAtDirection(openTargets[randomIndex].transform.position);
 
-            SwitchPlayerState(PlayerState.Run);
-            timer = kickAimTimer;
+            }
         }
-        //Choose one of the 4 spots on the goal which aren't covered by an enemy player. Position yourself behind the ball in that direction, and kick().
+
+        if (kickAimTimerTemp <= 0)
+        {
+            Kick((posToLookAt - (Vector2)transform.position), kickPower * 1.5f);
+            SwitchPlayerState(PlayerState.Run);
+            kickAimTimerTemp = kickAimTimer;
+        }
+
+        kickAimTimerTemp -= Time.deltaTime;
+
+
     }
 
     bool RaycastIsTargetOpen(GameObject expectedHit, Vector2 direction)
@@ -347,7 +337,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     {
         //Determines what the player is looking at.
         //Consider changing system to have this determine kick direction, not the player location.
-        posToLookAt = direction;
+        posToLookAt = (Vector2)direction;
     }
 
     void Kick(Vector2 direction,float kickPower)

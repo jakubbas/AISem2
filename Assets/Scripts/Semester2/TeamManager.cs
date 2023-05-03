@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class TeamManager : MonoBehaviour
 {
+    bool attackState = true;
+
     public int teamNumber;
     public TeamManager enemyManager;
 
@@ -19,8 +21,14 @@ public class TeamManager : MonoBehaviour
     void Start()
     {
         GetTeams();
+    }
 
+    //Called when the teams are initialized.
+    void Init()
+    {
+        // THIS IS BROKEN, IT CALLS FREEBALL() BEFORE GETTEAMS() IS FULLY COMPLETED, SO THE OWNTEAMPLAYERS ARRAY DOESN'T GET FILLED UP.
         AssignMarks();
+        FreeBall();
     }
 
     //Gets all the required objects and assigns them to their team variables.
@@ -44,6 +52,7 @@ public class TeamManager : MonoBehaviour
                 if (IPlayer.GetFootBallAgentTeamID() == teamNumber)
                 {
                     ownTeamPlayers.Add(IPlayer.GetFootBallAgentType());
+                    Debug.Log(ownTeamPlayers.Count);
                 }
 
                 else
@@ -79,6 +88,8 @@ public class TeamManager : MonoBehaviour
                 Debug.LogError("Unable to find goals in TeamManager");
             }
         }
+
+        Init();
     }
 
     void AssignMarks()
@@ -106,8 +117,28 @@ public class TeamManager : MonoBehaviour
         return enemyTeamPlayers[currentIndex];
     }
 
-    void Update()
+    void FreeBall()
     {
-        
+        Debug.Log(ownTeamPlayers.Count);
+        attackState = true;
+        Debug.Log(FindPlayerClosestToBall().name);
     }
+
+    FootBallAgent FindPlayerClosestToBall()
+    {
+        float shortestDistance = Mathf.Infinity;
+        int currentIndex = 0;
+
+        for (int i = 0; i < ownTeamPlayers.Count; i++)
+        {
+            if (Vector2.Distance((Vector2)ball.transform.position, (Vector2)ownTeamPlayers[i].transform.position) < shortestDistance)
+            {
+                shortestDistance = Vector2.Distance((Vector2)ball.transform.position, (Vector2)ownTeamPlayers[i].transform.position);
+                currentIndex = i;
+            }
+        }
+
+        return ownTeamPlayers[currentIndex];
+    }
+
 }

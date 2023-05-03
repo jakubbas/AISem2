@@ -3740,7 +3740,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -4346244404228752641, guid: bb9b634d77289b741a983f360ae5568a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -12646,11 +12646,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.74
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.83
+      value: 4.26
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.z
@@ -14132,7 +14132,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1188434757698281209, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1188434758210801075, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_Layer
@@ -14148,7 +14148,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1188434758732667862, guid: dc70b9b4c66f52c4caa72ed45ef13f78, type: 3}
       propertyPath: m_Layer
-      value: 6
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -15246,7 +15246,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2123130924516719863}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.72, y: -3.16, z: 0}
+  m_LocalPosition: {x: 5.38, y: 3.94, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15366,7 +15366,7 @@ GameObject:
   - component: {fileID: 2123130925076601775}
   m_Layer: 6
   m_Name: WeaponCollider
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
