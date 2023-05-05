@@ -12,9 +12,5 @@ public interface IPlayer
 
     void SetMarkAgent(FootBallAgent newMark);
 
-    void AssignState(PlayerState playerState);
-
     GameObject GetBallHolder();
-
-    void AssignManagerToPlayer(TeamManager manager);
 }
