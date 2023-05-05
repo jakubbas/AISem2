@@ -52,7 +52,6 @@ public class TeamManager : MonoBehaviour
                 if (IPlayer.GetFootBallAgentTeamID() == teamNumber)
                 {
                     ownTeamPlayers.Add(IPlayer.GetFootBallAgentType());
-                    Debug.Log(ownTeamPlayers.Count);
                 }
 
                 else
@@ -119,8 +118,11 @@ public class TeamManager : MonoBehaviour
 
     void FreeBall()
     {
-        Debug.Log(ownTeamPlayers.Count);
+        //Debug.Log(ownTeamPlayers.Count);
         attackState = true;
+        Debug.Log("erer");
+        Debug.Log(ownTeamPlayers.Count);
+
         Debug.Log(FindPlayerClosestToBall().name);
     }
 
