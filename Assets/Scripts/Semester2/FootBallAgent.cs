@@ -133,9 +133,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     protected void Start()
     {
-        //ball = GameObject.FindGameObjectWithTag("Ball");
-        posToLookAt = ball.transform.position;
-
         foreach (GameObject goal in GameObject.FindGameObjectsWithTag("Goal"))
         {
             if (goal.TryGetComponent(out IGoalNet IGoalNet))
@@ -221,14 +218,14 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void GetBall()
     {
+        posToLookAt = ball.transform.position;
         //Tells the agent to run at the ball to get possession.
         ArriveToPosition((Vector2)ball.transform.position);
         if (hasBall)
         {
             DisableAllMovement();
             Debug.Log("HAS BALL");
-
-
+            Strike();
             //TELL TEAMMANAGER HERE THAT YOU HAVE THE BALL.
 
         }
@@ -236,7 +233,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Defend()
     {
-
+        posToLookAt = markAgent.transform.position;
 
         //Seek to position between the enemy player and your goal, and try to stay in that pocket. Slightly in front of the offensive player, will depend on stats.
     }
