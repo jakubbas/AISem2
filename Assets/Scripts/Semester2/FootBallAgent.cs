@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+
+public enum PlayerState
+{
+    Defend,
+    Pass,
+    Run,
+    GetOpen,
+    GetBall,
+    Strike,
+    NullState
+}
+
 public class FootBallAgent : MovingEntity, IPlayer
 {
     //ui
     private TextMesh playerStateText;
     //timers
-
-
 
     private float kickAimTimerTemp;
     public float kickAimTimer = 1.5f;
@@ -39,6 +49,9 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     bool m_Attacking;
 
+    private PlayerState currentPlayerState;
+
+    public TeamManager currentTeamManager;
     //
 
     SteeringBehaviour_Manager m_SteeringBehaviours;
@@ -77,12 +90,22 @@ public class FootBallAgent : MovingEntity, IPlayer
         return ballHolder;
     }
 
+    public void AssignState(PlayerState playerState)
+    {
+        currentPlayerState = playerState;
+    }
+
+    public void AssignManagerToPlayer(TeamManager manager)
+    {
+        currentTeamManager = manager;
+    }
+
     //End
 
     protected override void Awake()
     {
         base.Awake();
-        SwitchPlayerState(PlayerState.GetBall);
+        SwitchPlayerState(PlayerState.NullState);
 
         m_SteeringBehaviours = GetComponent<SteeringBehaviour_Manager>();
         m_Pursuit = GetComponent<SteeringBehaviour_Pursuit>();
@@ -166,6 +189,9 @@ public class FootBallAgent : MovingEntity, IPlayer
             case PlayerState.Run:
                 Run();
                 break;
+            case PlayerState.NullState:
+                NullState();
+                break;
             default:
                 break;
         }
@@ -187,15 +213,25 @@ public class FootBallAgent : MovingEntity, IPlayer
         return m_SteeringBehaviours.GenerateSteeringForce();
     }
 
-    private PlayerState currentPlayerState;
-    private enum PlayerState
+    void NullState()
     {
-        Defend,
-        Pass,
-        Run,
-        GetOpen,
-        GetBall,
-        Strike
+        //Used for debugging so I know when an agent doesn't have a task.
+        Debug.LogError(this.gameObject.name + " has an unassigned task.");
+    }
+
+    void GetBall()
+    {
+        //Tells the agent to run at the ball to get possession.
+        ArriveToPosition((Vector2)ball.transform.position);
+        if (hasBall)
+        {
+            DisableAllMovement();
+            Debug.Log("HAS BALL");
+
+
+            //TELL TEAMMANAGER HERE THAT YOU HAVE THE BALL.
+
+        }
     }
 
     void Defend()
@@ -262,8 +298,10 @@ public class FootBallAgent : MovingEntity, IPlayer
         if (kickAimTimerTemp <= 0)
         {
             Kick((posToLookAt - (Vector2)transform.position), kickPower * 1.5f);
-            SwitchPlayerState(PlayerState.Run);
             kickAimTimerTemp = kickAimTimer;
+
+            //TELL TEAMMANAGER HERE THAT YOU KICKED THE BALL.
+
         }
 
         kickAimTimerTemp -= Time.deltaTime;
@@ -285,20 +323,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         Debug.Log("Strike obstructed by: " + hit.transform.gameObject.name);
         return false;
-    }
-
-
-
-    void GetBall()
-    {
-        //Tells the agent to run at the ball to get possession.
-        ArriveToPosition((Vector2)ball.transform.position);
-        if (hasBall)
-        {
-            DisableAllMovement();
-            Debug.Log("HAS BALL");
-            SwitchPlayerState(PlayerState.Strike);
-        }
     }
 
     void DisableAllMovement()

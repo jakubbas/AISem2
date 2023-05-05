@@ -6,6 +6,8 @@ using Vector2 = UnityEngine.Vector2;
 
 public class Ball : MonoBehaviour, IBall
 {
+    private int possessingTeam = -1;
+
     private Rigidbody2D rb;
 
     private float bouncePower = 50f;
@@ -13,9 +15,12 @@ public class Ball : MonoBehaviour, IBall
     private GameObject lastPlayerToTouch;
 
     [HideInInspector] public GameObject possessingPlayer;
+    
+
     // Start is called before the first frame update
     void Start()
     {
+        possessingTeam = -1;
         rb = this.GetComponent<Rigidbody2D>();
     }
 
@@ -67,6 +72,7 @@ public class Ball : MonoBehaviour, IBall
         lastPlayerToTouch = player;
         player.TryGetComponent(out IPlayer IPlayer);
         IPlayer.SetBallPossessed();
+        possessingTeam = IPlayer.GetFootBallAgentTeamID();
         this.transform.parent = IPlayer.GetBallHolder().transform;
     }
 
