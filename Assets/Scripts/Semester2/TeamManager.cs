@@ -157,4 +157,34 @@ public class TeamManager : MonoBehaviour
         return ownTeamPlayers[currentIndex];
     }
 
+    void StateCompleted(PlayerState state, bool successful)
+    {
+        switch (state)
+        {
+            case PlayerState.Defend:
+                //Shouldn't ever get here.
+                break;
+            case PlayerState.Strike:
+                //If successful, go on defense. If not, pass.
+                break;
+            case PlayerState.GetOpen:
+                //Shouldn't ever get here.
+                break;
+            case PlayerState.GetBall:
+                //If successful, go into decision making for pass/strike. If not, go defense.
+                break;
+            case PlayerState.Pass:
+                //If successful, get open or run depending on current position. If not succesful, tell teammates to get more open.
+                break;
+            case PlayerState.Run:
+                //Either gets the ball passed to them or GetOpen.
+                break;
+            case PlayerState.NullState:
+                
+                break;
+            default:
+                break;
+        }
+    }
+
 }

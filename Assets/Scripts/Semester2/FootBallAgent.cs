@@ -19,11 +19,13 @@ public class FootBallAgent : MovingEntity, IPlayer
 {
     //ui
     private TextMesh playerStateText;
-    //timers
+    //player variables
 
     private float kickAimTimerTemp;
     public float kickAimTimer = 1.5f;
 
+    private float defenceSlackPercent = 0.2f;
+    private float minDefenceSlackValue = 1.4f;
 
     //
 
@@ -43,7 +45,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     private Rigidbody2D rb;
 
     private float rotation;
-    private GameObject arrowPoint;
+    public GameObject arrowPoint;
 
     private Vector2 posToLookAt;
 
@@ -114,7 +116,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         m_Seek = GetComponent<SteeringBehaviour_Seek>();
 
         rb = GetComponent<Rigidbody2D>();
-        arrowPoint = GameObject.Find("ArrowPoint");
 
         playerStateText = this.GetComponentInChildren<TextMesh>();
 
@@ -218,14 +219,13 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void GetBall()
     {
-        posToLookAt = ball.transform.position;
+        LookAtDirection(ball.transform.position);
         //Tells the agent to run at the ball to get possession.
         ArriveToPosition((Vector2)ball.transform.position);
         if (hasBall)
         {
             DisableAllMovement();
-            Debug.Log("HAS BALL");
-            Strike();
+            SwitchPlayerState(PlayerState.NullState);
             //TELL TEAMMANAGER HERE THAT YOU HAVE THE BALL.
 
         }
@@ -234,6 +234,17 @@ public class FootBallAgent : MovingEntity, IPlayer
     void Defend()
     {
         posToLookAt = markAgent.transform.position;
+
+        Vector2 goToPos;
+        goToPos = ownGoal.transform.position - markAgent.transform.position;
+        goToPos = goToPos * defenceSlackPercent;
+        if (Maths.Magnitude(goToPos) < minDefenceSlackValue)
+        {
+            Debug.Log("ehrhere");
+            Debug.Log(Maths.Magnitude(goToPos));
+        }
+        goToPos = (Vector2)markAgent.transform.position + goToPos;
+        SeekToPosition(goToPos);
 
         //Seek to position between the enemy player and your goal, and try to stay in that pocket. Slightly in front of the offensive player, will depend on stats.
     }
@@ -280,6 +291,8 @@ public class FootBallAgent : MovingEntity, IPlayer
             if (openTargets.Count == 0)
             {
                 Debug.Log("No valid target to strike.");
+
+                //TELL THE MANAGER THAT IT FAILED.
             }
 
             //If there is an available target, pick a random one and strike.
@@ -336,7 +349,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         m_Seek.m_Active = true;
         if (Maths.Magnitude((Vector2)transform.position - m_Seek.m_TargetPosition) < 0.1f)
         {
-            Debug.Log("Reached Seek Position");
             m_Seek.m_Active = false;
         }    
 
@@ -348,7 +360,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         m_Arrive.m_Active = true;
         if (Maths.Magnitude((Vector2)transform.position - m_Arrive.m_TargetPosition) < 0.1f)
         {
-            Debug.Log("Reached Seek Position");
             m_Arrive.m_Active = false;
         }
 
