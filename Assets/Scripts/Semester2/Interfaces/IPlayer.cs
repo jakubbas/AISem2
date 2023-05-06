@@ -17,4 +17,6 @@ public interface IPlayer
     GameObject GetBallHolder();
 
     void AssignManagerToPlayer(TeamManager manager);
+
+    int GetPositionIndex();
 }

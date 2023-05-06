@@ -12,7 +12,15 @@ public enum PlayerState
     GetOpen,
     GetBall,
     Strike,
+    Waiting,
     NullState
+}
+
+public enum Role
+{
+    Left,
+    Middle,
+    Right
 }
 
 public class FootBallAgent : MovingEntity, IPlayer
@@ -54,6 +62,15 @@ public class FootBallAgent : MovingEntity, IPlayer
     private PlayerState currentPlayerState;
 
     public TeamManager currentTeamManager;
+
+    private List<GameObject> mapPoints = new List<GameObject>();
+
+    private GameObject newMapPoint;
+
+    private GameObject currentMapPoint;
+
+    public Role role;
+
     //
 
     SteeringBehaviour_Manager m_SteeringBehaviours;
@@ -69,6 +86,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     public void SetBallPossessed()
     {
         hasBall = true;
+        currentTeamManager.BallGained(this);
     }
 
     public FootBallAgent GetFootBallAgentType()
@@ -100,6 +118,12 @@ public class FootBallAgent : MovingEntity, IPlayer
     public void AssignManagerToPlayer(TeamManager manager)
     {
         currentTeamManager = manager;
+    }
+
+    public int GetPositionIndex()
+    {
+        currentMapPoint.TryGetComponent<MapPoint>(out MapPoint map);
+        return map.mapPositionIndex;
     }
 
     //End
@@ -150,9 +174,44 @@ public class FootBallAgent : MovingEntity, IPlayer
         }
         m_Pursuit.m_Active = false;
         m_Seek.m_Active = false;
-
+        FindMapPointsByRole();
+        currentMapPoint = FindClosestMapPoint();
     }
-    // Update is called once per frame
+
+    void FindMapPointsByRole()
+    {
+        GameObject holder;
+
+        switch (role)
+        {
+            case Role.Left:
+                holder = GameObject.Find("MapPointsLeft");
+                foreach (Transform child in holder.transform)
+                {
+                    mapPoints.Add(child.gameObject);
+
+                }
+                break;
+            case Role.Middle:
+                holder = GameObject.Find("MapPointsMiddle");
+                foreach (Transform child in holder.transform)
+                {
+                    mapPoints.Add(child.gameObject);
+                }
+
+                //
+                break;
+            case Role.Right:
+                holder = GameObject.Find("MapPointsRight");
+                foreach (Transform child in holder.transform)
+                {
+                    mapPoints.Add(child.gameObject);
+                }
+                //
+                break;
+        }
+        
+    }
 
     float GetAngleLookAt()
     {
@@ -214,22 +273,47 @@ public class FootBallAgent : MovingEntity, IPlayer
     void NullState()
     {
         //Used for debugging so I know when an agent doesn't have a task.
-        Debug.LogError(this.gameObject.name + " has an unassigned task.");
+        //Debug.LogError(this.gameObject.name + " has an unassigned task.");
     }
 
     void GetBall()
     {
+        GameObject closestMapPoint;
         LookAtDirection(ball.transform.position);
         //Tells the agent to run at the ball to get possession.
         ArriveToPosition((Vector2)ball.transform.position);
         if (hasBall)
         {
             DisableAllMovement();
-            SwitchPlayerState(PlayerState.NullState);
-            //TELL TEAMMANAGER HERE THAT YOU HAVE THE BALL.
+            closestMapPoint = FindClosestMapPoint();
+            ChangeMapPosition(closestMapPoint);
+            SwitchPlayerState(PlayerState.Waiting);
 
         }
     }
+
+    GameObject FindClosestMapPoint()
+    {
+        float shortestDistance = Mathf.Infinity;
+        int currentIndex = 0;
+
+        for (int i = 0; i < mapPoints.Count; i++)
+        {
+            if (Vector2.Distance((Vector2)this.transform.position, (Vector2)mapPoints[i].transform.position) < shortestDistance)
+            {
+                shortestDistance = Vector2.Distance((Vector2)this.transform.position, (Vector2)mapPoints[i].transform.position);
+                currentIndex = i;
+            }
+        }
+        return mapPoints[currentIndex];
+    }
+
+    void ChangeMapPosition(GameObject newMapPosition)
+    {
+        currentMapPoint = newMapPosition;
+        currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
+        currentTeamManager.PlayerReachedMapPosition(currentMapPoint, this);
+    }    
 
     void Defend()
     {
@@ -237,7 +321,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         Vector2 goToPos;
         goToPos = ownGoal.transform.position - markAgent.transform.position;
-        Debug.Log(Maths.Magnitude(goToPos));
         if (Maths.Magnitude(goToPos) < minDefenceSlackValue)
         {
             Debug.Log("here");
@@ -254,17 +337,63 @@ public class FootBallAgent : MovingEntity, IPlayer
         //Seek to position between the enemy player and your goal, and try to stay in that pocket. Slightly in front of the offensive player, will depend on stats.
     }
 
+    void Waiting()
+    {
+
+    }
+
     void Pass()
     {
+        //Check if either teammate is ready to be passed to. If not return to teammanager false.
+        //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed to determine who to pass to.
         //Find a position to pass to.
-        //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed.
         //Will need a reference to the teammate and their defender.
 
     }
     void Run()
     {
+        currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
+
+        if (hasBall)
+            Debug.LogError("Trying to run with ball.");
+
+        else
+        {
+            //If the new map point hasn't been selected yet.
+            if (newMapPoint == null || newMapPoint == point)
+            {
+                //Switch on team number. Team 0 goes down the array, Team 1 goes up the array.
+                switch (teamNumber)
+                {
+                    case 0:
+                        newMapPoint = mapPoints[point.mapPositionIndex - 1];
+                        if (point.mapPositionIndex - 1 < 0)
+                            Debug.LogError("Out of map index.");
+                         
+                        break;
+                    case 1:
+                        newMapPoint = mapPoints[point.mapPositionIndex + 1];
+                        if (point.mapPositionIndex + 1 > 2)
+                            Debug.LogError("Out of map index.");
+                        break;
+                }
+            }
+
+            else
+            {
+                SeekToPosition(newMapPoint.transform.position);
+            }
+
+        }
         //When your teammate has the ball, run towards the enemy goal. Once close enough, either the ball is passed or GetOpen();
         //Random position in semi-circle coming from the goal. The radius of the semi-circle will depend on kick power.
+    }
+
+    GameObject getNewRunPosition()
+    {
+
+
+        return null;
     }
 
     void GetOpen()

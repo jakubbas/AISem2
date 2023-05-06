@@ -23,6 +23,8 @@ public class TeamManager : MonoBehaviour
 
     private Ball ball;
 
+    private FootBallAgent ballHandler;
+
     void Start()
     {
         GetTeams();
@@ -140,9 +142,51 @@ public class TeamManager : MonoBehaviour
 
 
         }    
-        
     }
 
+    public void BallGained(FootBallAgent newBallHandler)
+    {
+        ballHandler = newBallHandler;
+        //Remove this maybe?? Added last second.
+        MovePlayersUp();
+    }
+
+    public void PlayerReachedMapPosition(GameObject mapPosition, FootBallAgent player)
+    {
+        List<int> tempIndexList = new List<int>();
+        for (int i = 0; i < ownTeamPlayers.Count; i++)
+        {
+            ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
+            mapPosition.TryGetComponent<MapPoint>(out MapPoint point);
+            tempIndexList.Add(IPlayer.GetPositionIndex());
+        }
+        //If all the players are at the same position;
+        if (tempIndexList[0] == tempIndexList[1] && tempIndexList[0] == tempIndexList[2])
+        {
+            MovePlayersUp();
+        }
+        else
+        {
+            //Maybe an issue here as the ball handler might not be the one that is behind but another player.
+            ballHandler.AssignState(PlayerState.Pass);
+        }
+    }
+
+    void MovePlayersUp()
+    {
+        for (int i = 0; i < ownTeamPlayers.Count; i++)
+        {
+            ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
+
+            if (ownTeamPlayers[i] == ballHandler)
+                IPlayer.AssignState(PlayerState.Waiting);
+
+            else
+            {
+                IPlayer.AssignState(PlayerState.Run);
+            }    
+        }
+    }
     FootBallAgent FindPlayerClosestToBall()
     {
         float shortestDistance = Mathf.Infinity;
@@ -156,14 +200,12 @@ public class TeamManager : MonoBehaviour
                 currentIndex = i;
             }
         }
-
         return ownTeamPlayers[currentIndex];
     }
 
     void StateCompleted(PlayerState state, bool successful, FootBallAgent player)
     {
         player.TryGetComponent(out IPlayer IPlayer);
-
 
         switch (state)
         {
@@ -198,13 +240,16 @@ public class TeamManager : MonoBehaviour
                 //If successful, go into decision making for pass/strike. If not, go defense.
                 break;
             case PlayerState.Pass:
-                //If successful, get open or run depending on current position. If not succesful, tell teammates to get more open.
+                //If successful, get open or run depending on current position. If not succesful repeat until it is.
                 break;
             case PlayerState.Run:
-                //Either gets the ball passed to them or GetOpen.
+                //Arrives at the run to location.
+                if (successful)
+                {
+                    IPlayer.AssignState(PlayerState.Waiting);
+                }
                 break;
             case PlayerState.NullState:
-                
                 break;
             default:
                 break;
