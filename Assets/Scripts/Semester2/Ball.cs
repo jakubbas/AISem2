@@ -33,7 +33,6 @@ public class Ball : MonoBehaviour, IBall
         shotVector *= power;
         rb.AddForce(shotVector);
         this.transform.parent = null;
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

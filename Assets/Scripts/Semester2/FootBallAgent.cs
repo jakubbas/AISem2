@@ -25,7 +25,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     public float kickAimTimer = 1.5f;
 
     private float defenceSlackPercent = 0.2f;
-    private float minDefenceSlackValue = 1.4f;
+    private float minDefenceSlackValue = 6.5f;
 
     //
 
@@ -237,11 +237,16 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         Vector2 goToPos;
         goToPos = ownGoal.transform.position - markAgent.transform.position;
-        goToPos = goToPos * defenceSlackPercent;
+        Debug.Log(Maths.Magnitude(goToPos));
         if (Maths.Magnitude(goToPos) < minDefenceSlackValue)
         {
-            Debug.Log("ehrhere");
-            Debug.Log(Maths.Magnitude(goToPos));
+            Debug.Log("here");
+            goToPos = goToPos * (defenceSlackPercent + 0.1f);
+        }
+
+        else
+        {
+            goToPos = goToPos * defenceSlackPercent;
         }
         goToPos = (Vector2)markAgent.transform.position + goToPos;
         SeekToPosition(goToPos);

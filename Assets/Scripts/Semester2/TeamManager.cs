@@ -10,6 +10,11 @@ public class TeamManager : MonoBehaviour
     public int teamNumber;
     public TeamManager enemyManager;
 
+    public GameObject[] mapPointsLower;
+    public GameObject[] mapPointsMiddle;
+    public GameObject[] mapPointsUpper;
+
+
     private List<FootBallAgent> ownTeamPlayers = new List<FootBallAgent>();
     private List<FootBallAgent> enemyTeamPlayers = new List<FootBallAgent>();
 
@@ -131,12 +136,10 @@ public class TeamManager : MonoBehaviour
             else
             {
                 IPlayer.AssignState(PlayerState.Defend);
-
             }
 
 
         }    
-            Debug.Log(FindPlayerClosestToBall().name);
         
     }
 
@@ -157,8 +160,11 @@ public class TeamManager : MonoBehaviour
         return ownTeamPlayers[currentIndex];
     }
 
-    void StateCompleted(PlayerState state, bool successful)
+    void StateCompleted(PlayerState state, bool successful, FootBallAgent player)
     {
+        player.TryGetComponent(out IPlayer IPlayer);
+
+
         switch (state)
         {
             case PlayerState.Defend:
@@ -166,11 +172,29 @@ public class TeamManager : MonoBehaviour
                 break;
             case PlayerState.Strike:
                 //If successful, go on defense. If not, pass.
+                if (successful)
+                {
+                    IPlayer.AssignState(PlayerState.Defend);
+                }
+                else
+                {
+                    IPlayer.AssignState(PlayerState.Pass);
+                }
                 break;
             case PlayerState.GetOpen:
                 //Shouldn't ever get here.
                 break;
             case PlayerState.GetBall:
+                if (successful)
+                {
+                    //Decision making to pass.
+
+                }
+                else
+                {
+                    //Change state to defense.
+                    IPlayer.AssignState(PlayerState.Defend);
+                }
                 //If successful, go into decision making for pass/strike. If not, go defense.
                 break;
             case PlayerState.Pass:
