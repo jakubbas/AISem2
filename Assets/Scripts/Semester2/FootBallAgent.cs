@@ -26,11 +26,15 @@ public enum Role
 public class FootBallAgent : MovingEntity, IPlayer
 {
     //ui
-    private TextMesh playerStateText;
+    public TextMesh playerStateText;
+    public TextMesh playerPositionText;
     //player variables
 
     private float kickAimTimerTemp;
     public float kickAimTimer = 1.5f;
+
+    private float passAimTimerTemp;
+    public float passAimTimer = 1f;
 
     private float defenceSlackPercent = 0.2f;
     private float minDefenceSlackValue = 6.5f;
@@ -65,7 +69,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     private List<GameObject> mapPoints = new List<GameObject>();
 
-    private GameObject newMapPoint;
+    public GameObject newMapPoint;
 
     private GameObject currentMapPoint;
 
@@ -102,7 +106,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     public void SetMarkAgent(FootBallAgent newMark)
     {
         markAgent = newMark;
-        Debug.Log("New mark: " + markAgent.name);
+        //Debug.Log("New mark: " + markAgent.name);
     }
 
     public GameObject GetBallHolder()
@@ -126,13 +130,41 @@ public class FootBallAgent : MovingEntity, IPlayer
         return map.mapPositionIndex;
     }
 
+    public PlayerState GetPlayerState()
+    {
+        return currentPlayerState;
+    }
+
+    public void ChangeNewMapPoint()
+    {
+        currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
+        int currentMapPointArrayIndex = point.mapPositionIndex;
+
+        switch (teamNumber)
+        {
+            case 0:
+                currentMapPointArrayIndex--;
+                newMapPoint = mapPoints[currentMapPointArrayIndex];
+                if (point.mapPositionIndex - 1 < 0)
+                    Debug.LogError("Out of map index.");
+
+                break;
+            case 1:
+                //GO UP THE MAPPOINTS ARRAY BY ONE.
+                currentMapPointArrayIndex++;
+                newMapPoint = mapPoints[currentMapPointArrayIndex];
+                if (point.mapPositionIndex + 1 > 2)
+                    Debug.LogError("Out of map index.");
+                break;
+        }
+    }
+
     //End
 
     protected override void Awake()
     {
         base.Awake();
         SwitchPlayerState(PlayerState.NullState);
-
         m_SteeringBehaviours = GetComponent<SteeringBehaviour_Manager>();
         m_Pursuit = GetComponent<SteeringBehaviour_Pursuit>();
         m_Arrive = GetComponent<SteeringBehaviour_Arrive>();
@@ -140,9 +172,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         m_Seek = GetComponent<SteeringBehaviour_Seek>();
 
         rb = GetComponent<Rigidbody2D>();
-
-        playerStateText = this.GetComponentInChildren<TextMesh>();
-
 
         if (!m_SteeringBehaviours)
             Debug.LogError("Object doesn't have a Steering Behaviour Manager attached", this);
@@ -154,6 +183,7 @@ public class FootBallAgent : MovingEntity, IPlayer
             Debug.LogError("Object doesn't have a Steering Behaviour Seek attached", this);
 
         kickAimTimerTemp = kickAimTimer;
+        passAimTimerTemp = passAimTimer;
     }
 
     protected void Start()
@@ -226,6 +256,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     {
         base.FixedUpdate();
         playerStateText.text = currentPlayerState.ToString();
+        playerPositionText.text = GetPositionIndex().ToString();
         switch (currentPlayerState)
         {
             case PlayerState.Defend:
@@ -245,6 +276,9 @@ public class FootBallAgent : MovingEntity, IPlayer
                 break;
             case PlayerState.Run:
                 Run();
+                break;
+            case PlayerState.Waiting:
+                Waiting();
                 break;
             case PlayerState.NullState:
                 NullState();
@@ -287,8 +321,7 @@ public class FootBallAgent : MovingEntity, IPlayer
             DisableAllMovement();
             closestMapPoint = FindClosestMapPoint();
             ChangeMapPosition(closestMapPoint);
-            SwitchPlayerState(PlayerState.Waiting);
-
+            currentTeamManager.StateCompleted(PlayerState.GetBall, true, this);
         }
     }
 
@@ -315,7 +348,7 @@ public class FootBallAgent : MovingEntity, IPlayer
         currentTeamManager.PlayerReachedMapPosition(currentMapPoint, this);
     }    
 
-    void Defend()
+    void Defend()   
     {
         posToLookAt = markAgent.transform.position;
 
@@ -323,7 +356,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         goToPos = ownGoal.transform.position - markAgent.transform.position;
         if (Maths.Magnitude(goToPos) < minDefenceSlackValue)
         {
-            Debug.Log("here");
             goToPos = goToPos * (defenceSlackPercent + 0.1f);
         }
 
@@ -339,21 +371,97 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void Waiting()
     {
-
+        currentTeamManager.StateCompleted(PlayerState.Waiting, true, this);
     }
 
     void Pass()
     {
+        if (passAimTimerTemp == passAimTimer)
+        {
+            List<FootBallAgent> teammates = new List<FootBallAgent>();
+            teammates = GetTeammateToPass(currentTeamManager.GetTeammates(this));
+            //If both teammates are not ready for the pass yet.
+            if (teammates.Count != 2)
+            {
+                currentTeamManager.StateCompleted(PlayerState.Pass, false, this);
+                return;
+            }
+
+            else
+            {
+                int randomTeammate = Random.Range(0, teammates.Count);
+                LookAtDirection(teammates[randomTeammate].transform.position);
+            };
+        }
+
+        if (passAimTimerTemp<=0)
+        {
+            Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.5f);
+            passAimTimerTemp = passAimTimer;
+            currentTeamManager.StateCompleted(PlayerState.Pass, true, this);
+        }
+
+        passAimTimerTemp -= Time.deltaTime;
+
         //Check if either teammate is ready to be passed to. If not return to teammanager false.
         //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed to determine who to pass to.
         //Find a position to pass to.
         //Will need a reference to the teammate and their defender.
 
     }
+
+    List<FootBallAgent> GetTeammateToPass(List<FootBallAgent> teammates)
+    {
+        //Run fuzzy logic here.
+        //Check if the teammates are ahead, if not, don't pass.
+        List<FootBallAgent> possibleTeammates = new List<FootBallAgent>();
+        //Checks if the teammates are ahead. If not, returns false to teammanager and waits.
+        for (int i = 0; i < teammates.Count; i++)
+        {
+            teammates[i].TryGetComponent(out IPlayer IPlayer);
+
+            if (IPlayer.GetPlayerState() == PlayerState.Waiting || IPlayer.GetPlayerState() == PlayerState.GetOpen)
+            {
+                possibleTeammates.Add(teammates[i]);
+            }
+
+            //switch (teamNumber)
+            //{
+            //    case 0:
+            //        //If the ball handler index is lower, they are ahead, so remove it.
+            //        if (IPlayer.GetPositionIndex() > GetPositionIndex())
+            //        {
+            //            possibleTeammates.Remove(teammates[i]);
+            //        }
+
+            //        else
+            //        {
+            //            Debug.Log("Ball Handler Index: " + GetPositionIndex() + " // Teammate Index: " + IPlayer.GetPositionIndex());
+            //        }
+            //        break;
+            //    case 1:
+            //        //If the ball handler index is higher, they are ahead, so remove it.
+            //        if (IPlayer.GetPositionIndex() < GetPositionIndex())
+            //        {
+            //            possibleTeammates.Remove(teammates[i]);
+            //        }
+            //        else
+            //        {
+            //            Debug.Log("Ball Handler Index: " + GetPositionIndex() + " // Teammate Index: " + IPlayer.GetPositionIndex());
+            //        }
+            //        break;
+            //}
+        }
+        return possibleTeammates;
+    }
+
     void Run()
     {
         currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
 
+        if (role == Role.Middle)
+            Debug.Log("Current point: " + point.mapPositionIndex);
+        
         if (hasBall)
             Debug.LogError("Trying to run with ball.");
 
@@ -362,26 +470,23 @@ public class FootBallAgent : MovingEntity, IPlayer
             //If the new map point hasn't been selected yet.
             if (newMapPoint == null || newMapPoint == point)
             {
+                Debug.Log("issue here");
+                ChangeNewMapPoint();
                 //Switch on team number. Team 0 goes down the array, Team 1 goes up the array.
-                switch (teamNumber)
-                {
-                    case 0:
-                        newMapPoint = mapPoints[point.mapPositionIndex - 1];
-                        if (point.mapPositionIndex - 1 < 0)
-                            Debug.LogError("Out of map index.");
-                         
-                        break;
-                    case 1:
-                        newMapPoint = mapPoints[point.mapPositionIndex + 1];
-                        if (point.mapPositionIndex + 1 > 2)
-                            Debug.LogError("Out of map index.");
-                        break;
-                }
+                //MAP POINT WAS HEREHR EHREH
             }
 
             else
             {
+                //Debug.Log(newMapPoint.name);
                 SeekToPosition(newMapPoint.transform.position);
+                //When they have reached the desired position, tell the manager.
+                if (!m_Seek.m_Active)
+                {
+                    ChangeMapPosition(newMapPoint);
+                    //currentTeamManager.PlayerReachedMapPosition(currentMapPoint, this);
+                    currentTeamManager.StateCompleted(PlayerState.Run, true, this);
+                }
             }
 
         }
@@ -391,8 +496,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     GameObject getNewRunPosition()
     {
-
-
         return null;
     }
 
@@ -441,15 +544,13 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         if (kickAimTimerTemp <= 0)
         {
-            Kick((posToLookAt - (Vector2)transform.position), kickPower * 1.5f);
+            Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.5f);
             kickAimTimerTemp = kickAimTimer;
-
             //TELL TEAMMANAGER HERE THAT YOU KICKED THE BALL.
 
         }
 
         kickAimTimerTemp -= Time.deltaTime;
-
 
     }
 

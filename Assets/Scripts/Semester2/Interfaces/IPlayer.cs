@@ -19,4 +19,9 @@ public interface IPlayer
     void AssignManagerToPlayer(TeamManager manager);
 
     int GetPositionIndex();
+
+    PlayerState GetPlayerState();
+
+    void ChangeNewMapPoint();
+
 }

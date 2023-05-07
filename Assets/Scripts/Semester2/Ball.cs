@@ -43,7 +43,6 @@ public class Ball : MonoBehaviour, IBall
         }
         //rb.velocity = Vector2.zero;
         Vector2 bounceVector;
-        Debug.Log(collision.gameObject.transform);
         float tempBouncePower = bouncePower;
         if (!collision.gameObject.CompareTag("Wall"))
         {
@@ -60,6 +59,7 @@ public class Ball : MonoBehaviour, IBall
         {
             if (possessingPlayer == null)
             {
+                this.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
                 CaptureBall(collision.gameObject);
             }
         }
