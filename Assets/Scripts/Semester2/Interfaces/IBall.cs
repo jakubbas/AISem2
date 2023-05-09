@@ -10,5 +10,8 @@ public interface IBall
 
     Ball GetBallType();
 
+    FootBallAgent GetBallHandler();
+
+    void SetTeamManagers(TeamManager teamManager);
 
 }

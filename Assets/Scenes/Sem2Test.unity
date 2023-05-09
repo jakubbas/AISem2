@@ -3986,6 +3986,7 @@ MonoBehaviour:
   teamNumber: 0
   arrowPoint: {fileID: 956591411}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 1
   detectionRadius: 50
 --- !u!58 &358812880
@@ -4105,7 +4106,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 358812874}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.266, y: 6.554, z: 0}
+  m_LocalPosition: {x: 0.06, y: -0.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4594,16 +4595,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 545477971}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 93c9b2ba851f9504ea2145711d719ef1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   teamNumber: 0
   enemyManager: {fileID: 1028695433}
-  mapPointsLower: []
-  mapPointsMiddle: []
-  mapPointsUpper: []
+  waitingPlayers: []
 --- !u!4 &545477973
 Transform:
   m_ObjectHideFlags: 0
@@ -5102,6 +5101,7 @@ MonoBehaviour:
   teamNumber: 1
   arrowPoint: {fileID: 721073885}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 1
   detectionRadius: 50
 --- !u!58 &880532503
@@ -14216,18 +14216,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   teamNumber: 1
   enemyManager: {fileID: 545477972}
-  mapPointsLower:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  mapPointsMiddle:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  mapPointsUpper:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitingPlayers: []
 --- !u!4 &1028695434
 Transform:
   m_ObjectHideFlags: 0
@@ -14527,7 +14516,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.77
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509863, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_LocalPosition.z
@@ -16515,6 +16504,7 @@ MonoBehaviour:
   teamNumber: 1
   arrowPoint: {fileID: 375322132}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 0
   detectionRadius: 50
 --- !u!58 &1395899161
@@ -17838,6 +17828,7 @@ MonoBehaviour:
   teamNumber: 0
   arrowPoint: {fileID: 1355438782}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 0
   detectionRadius: 50
 --- !u!58 &1645722436
@@ -17957,7 +17948,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1645722430}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.566, y: 6.554, z: 0}
+  m_LocalPosition: {x: -5.01, y: 1.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18144,6 +18135,7 @@ MonoBehaviour:
   teamNumber: 0
   arrowPoint: {fileID: 1369191680}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 2
   detectionRadius: 50
 --- !u!58 &1649483172
@@ -18263,7 +18255,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1649483166}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.879, y: 6.554, z: 0}
+  m_LocalPosition: {x: 5.32, y: 1.1599998, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18508,6 +18500,7 @@ MonoBehaviour:
   teamNumber: 1
   arrowPoint: {fileID: 1225953388}
   currentTeamManager: {fileID: 0}
+  newMapPoint: {fileID: 0}
   role: 2
   detectionRadius: 50
 --- !u!58 &1741919908

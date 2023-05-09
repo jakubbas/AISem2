@@ -36,7 +36,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     private float passAimTimerTemp;
     public float passAimTimer = 1f;
 
-    private float defenceSlackPercent = 0.2f;
+    private float defenceSlackPercent = 0.35f;
     private float minDefenceSlackValue = 6.5f;
 
     //
@@ -116,6 +116,7 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     public void AssignState(PlayerState playerState)
     {
+        currentTeamManager.waitingPlayers.Remove(this);
         currentPlayerState = playerState;
     }
 
@@ -249,7 +250,6 @@ public class FootBallAgent : MovingEntity, IPlayer
         tempPosToLookAt -= (Vector2)transform.position;
         float angle = Mathf.Atan2(tempPosToLookAt.y, tempPosToLookAt.x) * Mathf.Rad2Deg;
         return angle;
-
     }
 
     protected override void FixedUpdate()
@@ -344,7 +344,6 @@ public class FootBallAgent : MovingEntity, IPlayer
     void ChangeMapPosition(GameObject newMapPosition)
     {
         currentMapPoint = newMapPosition;
-        currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
         currentTeamManager.PlayerReachedMapPosition(currentMapPoint, this);
     }    
 
@@ -365,13 +364,24 @@ public class FootBallAgent : MovingEntity, IPlayer
         }
         goToPos = (Vector2)markAgent.transform.position + goToPos;
         SeekToPosition(goToPos);
+        //If the player steals the ball during defense.
+        if (hasBall)
+        {
+            currentTeamManager.StateCompleted(PlayerState.GetBall, true, this);
+        }
 
         //Seek to position between the enemy player and your goal, and try to stay in that pocket. Slightly in front of the offensive player, will depend on stats.
     }
 
     void Waiting()
     {
-        currentTeamManager.StateCompleted(PlayerState.Waiting, true, this);
+        if (!currentTeamManager.waitingPlayers.Contains(this))
+        {
+            currentTeamManager.AddWaitingPlayers(this);
+            newMapPoint = null;
+        }
+        //currentTeamManager.StateCompleted(PlayerState.Waiting, true, this);
+
     }
 
     void Pass()
@@ -392,6 +402,9 @@ public class FootBallAgent : MovingEntity, IPlayer
                 int randomTeammate = Random.Range(0, teammates.Count);
                 LookAtDirection(teammates[randomTeammate].transform.position);
             };
+
+            if (teammates.Count == 0)
+                Debug.Log("NO TEAMMATES TO PASS TO");
         }
 
         if (passAimTimerTemp<=0)
@@ -407,8 +420,9 @@ public class FootBallAgent : MovingEntity, IPlayer
         //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed to determine who to pass to.
         //Find a position to pass to.
         //Will need a reference to the teammate and their defender.
-
     }
+
+
 
     List<FootBallAgent> GetTeammateToPass(List<FootBallAgent> teammates)
     {
@@ -424,33 +438,6 @@ public class FootBallAgent : MovingEntity, IPlayer
             {
                 possibleTeammates.Add(teammates[i]);
             }
-
-            //switch (teamNumber)
-            //{
-            //    case 0:
-            //        //If the ball handler index is lower, they are ahead, so remove it.
-            //        if (IPlayer.GetPositionIndex() > GetPositionIndex())
-            //        {
-            //            possibleTeammates.Remove(teammates[i]);
-            //        }
-
-            //        else
-            //        {
-            //            Debug.Log("Ball Handler Index: " + GetPositionIndex() + " // Teammate Index: " + IPlayer.GetPositionIndex());
-            //        }
-            //        break;
-            //    case 1:
-            //        //If the ball handler index is higher, they are ahead, so remove it.
-            //        if (IPlayer.GetPositionIndex() < GetPositionIndex())
-            //        {
-            //            possibleTeammates.Remove(teammates[i]);
-            //        }
-            //        else
-            //        {
-            //            Debug.Log("Ball Handler Index: " + GetPositionIndex() + " // Teammate Index: " + IPlayer.GetPositionIndex());
-            //        }
-            //        break;
-            //}
         }
         return possibleTeammates;
     }
@@ -458,9 +445,6 @@ public class FootBallAgent : MovingEntity, IPlayer
     void Run()
     {
         currentMapPoint.TryGetComponent<MapPoint>(out MapPoint point);
-
-        if (role == Role.Middle)
-            Debug.Log("Current point: " + point.mapPositionIndex);
         
         if (hasBall)
             Debug.LogError("Trying to run with ball.");
@@ -470,7 +454,6 @@ public class FootBallAgent : MovingEntity, IPlayer
             //If the new map point hasn't been selected yet.
             if (newMapPoint == null || newMapPoint == point)
             {
-                Debug.Log("issue here");
                 ChangeNewMapPoint();
                 //Switch on team number. Team 0 goes down the array, Team 1 goes up the array.
                 //MAP POINT WAS HEREHR EHREH
@@ -528,6 +511,7 @@ public class FootBallAgent : MovingEntity, IPlayer
             if (openTargets.Count == 0)
             {
                 Debug.Log("No valid target to strike.");
+                currentTeamManager.StateCompleted(PlayerState.Strike, false, this);
 
                 //TELL THE MANAGER THAT IT FAILED.
             }

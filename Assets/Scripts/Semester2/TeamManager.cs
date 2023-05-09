@@ -10,11 +10,6 @@ public class TeamManager : MonoBehaviour
     public int teamNumber;
     public TeamManager enemyManager;
 
-    public GameObject[] mapPointsLower;
-    public GameObject[] mapPointsMiddle;
-    public GameObject[] mapPointsUpper;
-
-
     private List<FootBallAgent> ownTeamPlayers = new List<FootBallAgent>();
     private List<FootBallAgent> enemyTeamPlayers = new List<FootBallAgent>();
 
@@ -27,6 +22,8 @@ public class TeamManager : MonoBehaviour
 
     private bool passWaitingRunning = false;
 
+    public List<FootBallAgent> waitingPlayers;
+
     void Start()
     {
         GetTeams();
@@ -38,6 +35,8 @@ public class TeamManager : MonoBehaviour
         // THIS IS BROKEN, IT CALLS FREEBALL() BEFORE GETTEAMS() IS FULLY COMPLETED, SO THE OWNTEAMPLAYERS ARRAY DOESN'T GET FILLED UP.
         AssignMarks();
         FreeBall();
+        ball.TryGetComponent(out IBall IBall);
+        IBall.SetTeamManagers(this);
     }
 
     //Gets all the required objects and assigns them to their team variables.
@@ -149,6 +148,8 @@ public class TeamManager : MonoBehaviour
     public void BallGained(FootBallAgent newBallHandler)
     {
         ballHandler = newBallHandler;
+        enemyManager.OpponentPossessionGained();
+
         //Remove this maybe?? Added last second.
         //MovePlayersUp();
     }
@@ -311,7 +312,13 @@ public class TeamManager : MonoBehaviour
                 //If successful, get open or run depending on current position. If not succesful repeat until it is.
                 if (successful)
                 {
-                    IPlayer.AssignState(PlayerState.Run);
+
+                    if (!AllPlayersByGoal())
+                        IPlayer.AssignState(PlayerState.Run);
+                    else
+                    {
+                        IPlayer.AssignState(PlayerState.Waiting);
+                    }
                 }
                 else
                 {
@@ -326,25 +333,6 @@ public class TeamManager : MonoBehaviour
                 }
                 break;
             case PlayerState.Waiting:
-                //Check if all players are waiting.
-                bool allWaiting = true;
-                if (successful)
-                {
-                    for (int i = 0; i < ownTeamPlayers.Count; i++)
-                    {
-                        player.TryGetComponent(out IPlayer IPlayers);
-                        if (IPlayers.GetPlayerState() != PlayerState.Waiting)
-                        {
-                            allWaiting = false;
-                        }
-                    }
-
-                    if (allWaiting)
-                    {
-                        MovePlayersUp();
-                    }
-
-                }
                 break;
         }
     }
@@ -366,4 +354,63 @@ public class TeamManager : MonoBehaviour
 
     }
 
-}
+
+    public void AddWaitingPlayers(FootBallAgent waitingPlayer)
+    {
+        waitingPlayers.Add(waitingPlayer);
+        if (waitingPlayers.Count == ownTeamPlayers.Count)
+        {
+            if (AllPlayersByGoal())
+            {
+                ballHandler.AssignState(PlayerState.Strike);
+            }
+
+            else
+            {
+                MovePlayersUp();
+            }
+        }
+    }
+
+    void OpponentPossessionGained()
+    {
+      for (int i = 0; i < ownTeamPlayers.Count; i++)
+        {
+            ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
+            IPlayer.AssignState(PlayerState.Defend);
+        }
+    }
+
+    public void BallIsFree()
+    {
+        FootBallAgent closestPlayer = FindPlayerClosestToBall();
+        closestPlayer.TryGetComponent(out IPlayer IPlayer);
+        IPlayer.AssignState(PlayerState.GetBall);
+    }
+
+    public bool AllPlayersByGoal()
+    {
+        bool allByGoal = true;
+
+        for (int i = 0; i < ownTeamPlayers.Count; i++)
+        {
+            ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
+
+            switch (teamNumber)
+            {
+                case 0:
+                    if (IPlayer.GetPositionIndex() != 0)
+                        allByGoal = false;
+                    break;
+                case 1:
+                    if (IPlayer.GetPositionIndex() != 2)
+                        allByGoal = false;
+                    break;
+            }
+
+        }
+
+        return allByGoal;
+    }
+
+    }
