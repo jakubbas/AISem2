@@ -178,44 +178,6 @@ public class TeamManager : MonoBehaviour
         //If some of the player's arent in position.
         else
         {
-            //Remove ball handler from the tempIndexList.
-            //tempIndexList.RemoveAt(ownTeamPlayers.IndexOf(ballHandler));
-
-            //Maybe an issue here as the ball handler might not be the one that is behind but another player.
-            //Pass only if the ball handler is the one that is behind.
-
-            //switch (teamNumber)
-            //{
-            //    case 0:
-            //        if (tempIndexList[ownTeamPlayers.IndexOf(ballHandler)] > )
-            //        {
-
-            //        }
-
-
-
-
-            //        for (int i = 0; i < ownTeamPlayers.Count; i++)
-            //        {
-            //            ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
-            //            mapPosition.TryGetComponent<MapPoint>(out MapPoint point);
-            //        }
-
-
-
-
-
-
-
-
-            //        break;
-            //    case 1:
-
-
-            //        break;
-            //}
-
-            //if none are true, wait.
             ballHandler.AssignState(PlayerState.Pass);
         }
     }
@@ -229,31 +191,8 @@ public class TeamManager : MonoBehaviour
             if (ownTeamPlayers[i] != ballHandler)
                 IPlayer.AssignState(PlayerState.Run);
 
-            else
-            {
-                StartCoroutine(SwitchToPassTimer(IPlayer));
-            }    
         }
     }
-
-    IEnumerator SwitchToPassTimer(IPlayer IPlayer)
-    {
-        if (passWaitingRunning)
-        {
-            yield break;
-        }
-
-        passWaitingRunning = true;
-
-        yield return new WaitForSeconds(1);
-
-        IPlayer.AssignState(PlayerState.Pass);
-
-        passWaitingRunning = false;
-
-        yield break;
-    }
-
     FootBallAgent FindPlayerClosestToBall()
     {
         float shortestDistance = Mathf.Infinity;
@@ -290,6 +229,17 @@ public class TeamManager : MonoBehaviour
                     IPlayer.AssignState(PlayerState.Pass);
                 }
                 break;
+            case PlayerState.StrikeOrPass:
+                if (successful)
+                {
+                    IPlayer.AssignState(PlayerState.GetOpen);
+                }
+
+                else
+                {
+                    IPlayer.AssignState(PlayerState.Pass);
+                }
+                break;
             case PlayerState.GetOpen:
                 //Shouldn't ever get here.
                 break;
@@ -297,14 +247,32 @@ public class TeamManager : MonoBehaviour
                 if (successful)
                 {
                     ballHandler = player;
-                    MovePlayersUp();
-                    IPlayer.AssignState(PlayerState.Pass);
-                    //Decision making to pass.
+
+                    if (AllPlayersByGoal())
+                    {
+                        IPlayer.AssignState(PlayerState.StrikeOrPass);
+                        return;
+                    }
+
+                    else
+                    {
+                        MovePlayersUp();
+                        IPlayer.AssignState(PlayerState.Pass);
+                    }
+             
                 }
                 else
                 {
                     //Change state to defense.
-                    IPlayer.AssignState(PlayerState.Defend);
+
+                    for (int i = 0; i < ownTeamPlayers.Count; i++)
+                    {
+                        ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayers);
+                        IPlayers.AssignState(PlayerState.Defend);
+                    }
+
+
+
                 }
                 //If successful, go into decision making for pass/strike. If not, go defense.
                 break;
@@ -317,7 +285,7 @@ public class TeamManager : MonoBehaviour
                         IPlayer.AssignState(PlayerState.Run);
                     else
                     {
-                        IPlayer.AssignState(PlayerState.Waiting);
+                        IPlayer.AssignState(PlayerState.GetOpen);
                     }
                 }
                 else
@@ -333,6 +301,12 @@ public class TeamManager : MonoBehaviour
                 }
                 break;
             case PlayerState.Waiting:
+                if (successful)
+                {
+                    //Players are at the end.
+                    IPlayer.AssignState(PlayerState.GetOpen);
+
+                }
                 break;
         }
     }
@@ -362,7 +336,26 @@ public class TeamManager : MonoBehaviour
         {
             if (AllPlayersByGoal())
             {
-                ballHandler.AssignState(PlayerState.Strike);
+                if (ball.isPossessed)
+                {
+                    for (int i = 0; i < ownTeamPlayers.Count; i++)
+                    {
+                        ownTeamPlayers[i].TryGetComponent(out IPlayer IPlayer);
+                        if (ownTeamPlayers[i] == ballHandler)
+                        {
+                            ballHandler.AssignState(PlayerState.StrikeOrPass);
+
+                        }
+
+                        else
+                        {
+                            IPlayer.AssignState(PlayerState.StrikeOrPass);
+                        }
+                    }
+
+
+                }
+                
             }
 
             else
@@ -383,6 +376,7 @@ public class TeamManager : MonoBehaviour
 
     public void BallIsFree()
     {
+        ballHandler = null;
         FootBallAgent closestPlayer = FindPlayerClosestToBall();
         closestPlayer.TryGetComponent(out IPlayer IPlayer);
         IPlayer.AssignState(PlayerState.GetBall);

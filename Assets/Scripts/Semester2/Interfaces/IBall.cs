@@ -14,4 +14,6 @@ public interface IBall
 
     void SetTeamManagers(TeamManager teamManager);
 
+    bool IsBallPossessed();
+
 }

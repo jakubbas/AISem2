@@ -13,6 +13,7 @@ public enum PlayerState
     GetBall,
     Strike,
     Waiting,
+    StrikeOrPass,
     NullState
 }
 
@@ -75,6 +76,11 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     public Role role;
 
+    private bool inStrikeOrPass = false;
+
+    private Vector2 randomOpenOffset;
+
+    public FootBallAgent teammateToPass;
     //
 
     SteeringBehaviour_Manager m_SteeringBehaviours;
@@ -263,7 +269,7 @@ public class FootBallAgent : MovingEntity, IPlayer
                 Defend();
                 break;
             case PlayerState.Strike:
-                Strike();
+                Debug.Log("Shouldn't be here, should only run from StrikeOrPass()");
                 break;
             case PlayerState.GetOpen:
                 GetOpen();
@@ -279,6 +285,9 @@ public class FootBallAgent : MovingEntity, IPlayer
                 break;
             case PlayerState.Waiting:
                 Waiting();
+                break;
+            case PlayerState.StrikeOrPass:
+                StrikeOrPass();
                 break;
             case PlayerState.NullState:
                 NullState();
@@ -380,15 +389,22 @@ public class FootBallAgent : MovingEntity, IPlayer
             currentTeamManager.AddWaitingPlayers(this);
             newMapPoint = null;
         }
+
+        if (currentTeamManager.AllPlayersByGoal())
+        {
+            currentTeamManager.StateCompleted(PlayerState.Waiting, true, this);
+        }    
+
         //currentTeamManager.StateCompleted(PlayerState.Waiting, true, this);
 
     }
 
     void Pass()
     {
+        int randomTeammate;
+        List<FootBallAgent> teammates = new List<FootBallAgent>();
         if (passAimTimerTemp == passAimTimer)
         {
-            List<FootBallAgent> teammates = new List<FootBallAgent>();
             teammates = GetTeammateToPass(currentTeamManager.GetTeammates(this));
             //If both teammates are not ready for the pass yet.
             if (teammates.Count != 2)
@@ -399,27 +415,39 @@ public class FootBallAgent : MovingEntity, IPlayer
 
             else
             {
-                int randomTeammate = Random.Range(0, teammates.Count);
+                randomTeammate = Random.Range(0, teammates.Count);
                 LookAtDirection(teammates[randomTeammate].transform.position);
+                teammateToPass = teammates[randomTeammate];
             };
-
-            if (teammates.Count == 0)
-                Debug.Log("NO TEAMMATES TO PASS TO");
         }
 
         if (passAimTimerTemp<=0)
         {
-            Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.5f);
+            ChangeMapPosition(FindClosestMapPoint());
+
+            if (Vector2.Distance(this.transform.position, teammateToPass.transform.position) > 10f)
+            {
+                Debug.Log(Vector2.Distance(this.transform.position, teammateToPass.transform.position));
+                Kick(posToLookAt - (Vector2)transform.position, kickPower * 2f);
+            }
+
+            else
+            {
+                Debug.Log(Vector2.Distance(this.transform.position, teammateToPass.transform.position));
+                Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.2f);
+            }
+
+
+
+
+
             passAimTimerTemp = passAimTimer;
             currentTeamManager.StateCompleted(PlayerState.Pass, true, this);
+            return;
         }
 
         passAimTimerTemp -= Time.deltaTime;
 
-        //Check if either teammate is ready to be passed to. If not return to teammanager false.
-        //Fuzzy Logic : Openness and Distance and HowCloseToGoal and TeammateSpeed to determine who to pass to.
-        //Find a position to pass to.
-        //Will need a reference to the teammate and their defender.
     }
 
 
@@ -484,46 +512,114 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void GetOpen()
     {
+        if (!m_Seek.m_Active)
+        {
+            Vector2 randomOffset = new Vector2(0, 0);
+
+            if (teamNumber == 0)
+            {
+                randomOffset.x = Random.RandomRange(-0f, 2f);
+                randomOffset.y = Random.RandomRange(-0.5f, 0.5f);
+
+            }
+
+            if (teamNumber == 1)
+            {
+                randomOffset.x = Random.RandomRange(-2f, 0f);
+                randomOffset.y = Random.RandomRange(-0.5f, 0.5f);
+
+            }
+
+            randomOpenOffset = randomOffset;
+
+        }
+
+
+        SeekToPosition((Vector2)currentMapPoint.transform.position + randomOpenOffset);
+
+
+
+
+        //Find random seek near the currentMapPoint.
+
+        //Move towards it.
+
+        //Wait a second.
+
+        //Move towards a new point.
+
         //Randomly move left and right to lose the defender.
     }
 
-    void Strike()
+    void StrikeOrPass()
+    {
+        if (!ballHolder)
+        {
+            AssignState(PlayerState.Waiting);
+        }
+
+        if (inStrikeOrPass)
+        {
+            return;
+        }
+        inStrikeOrPass = true;
+
+        enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
+        GameObject[] targets = IGoalNet.GetAimTargets();
+        List<GameObject> openTargets = new List<GameObject>();
+
+        //For each target
+        for (int i = 0; i < targets.Length; i++)
+        {
+            //Check if there is nothing between the player and each target.
+            if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
+            {
+                openTargets.Add(targets[i]);
+            }
+        }
+
+        if (openTargets.Count == 0)
+        {
+            //currentTeamManager.StateCompleted(PlayerState.StrikeOrPass, false, this);
+            inStrikeOrPass = false;
+            return;
+            //TELL THE MANAGER THAT IT FAILED.
+        }
+
+        List<FootBallAgent> teammates = currentTeamManager.GetTeammates(this);
+
+
+
+
+        float r1 = openTargets.Count;
+        
+
+        
+
+        //Fuzzy logic here.
+
+        //Values used:
+        //Amount of open targets 1-4. The higher the better.
+        //How close the teammates defender is to them. The higher the better.
+        //How close the teammate is to the basket. The lower the better.
+
+
+
+
+
+
+
+
+    }
+
+    void Strike(List<GameObject> openTargets)
     {
         //Actually kicking the ball at a goal to score.
         if (kickAimTimerTemp == kickAimTimer)
         {
-            //Gets the targets from the opponent goal.
-            enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
-            GameObject[] targets = IGoalNet.GetAimTargets();
-            List<GameObject> openTargets = new List<GameObject>();
-
-            //For each target
-            for (int i = 0; i < targets.Length; i++)
-            {
-                //Check if there is nothing between the player and each target.
-                if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
-                {
-                    openTargets.Add(targets[i]);
-                }
-            }
-
-            //If every target is hidden away.
-            if (openTargets.Count == 0)
-            {
-                Debug.Log("No valid target to strike.");
-                currentTeamManager.StateCompleted(PlayerState.Strike, false, this);
-
-                //TELL THE MANAGER THAT IT FAILED.
-            }
-
-            //If there is an available target, pick a random one and strike.
-            else
-            {
-                int randomIndex;
-                randomIndex = Random.Range(0, openTargets.Count);
-                LookAtDirection(openTargets[randomIndex].transform.position);
-
-            }
+            int randomIndex;
+            randomIndex = Random.Range(0, openTargets.Count - 1);
+            LookAtDirection(openTargets[randomIndex].transform.position);
         }
 
         if (kickAimTimerTemp <= 0)
@@ -531,7 +627,6 @@ public class FootBallAgent : MovingEntity, IPlayer
             Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.5f);
             kickAimTimerTemp = kickAimTimer;
             //TELL TEAMMANAGER HERE THAT YOU KICKED THE BALL.
-
         }
 
         kickAimTimerTemp -= Time.deltaTime;
@@ -542,15 +637,12 @@ public class FootBallAgent : MovingEntity, IPlayer
     {
         RaycastHit2D hit;
         //Raycasts to the target, and if the raycast hits the target, returns true. Works on gameplay layer only.
-        hit = Physics2D.BoxCast((Vector2)transform.position, new Vector2(1, 1), 0, (direction - (Vector2)transform.position), LayerMask.GetMask("Gameplay"));
+        hit = Physics2D.BoxCast((Vector2)transform.position, new Vector2(0.3f, 0.3f), 0, (direction - (Vector2)transform.position), LayerMask.GetMask("Gameplay"));
         Debug.DrawRay((Vector2)transform.position, (direction - (Vector2)transform.position).normalized * 1000, Color.red, 3, false);
         if (hit.transform.gameObject == expectedHit)
         {
             return true;
         }
-
-
-        Debug.Log("Strike obstructed by: " + hit.transform.gameObject.name);
         return false;
     }
 
@@ -563,6 +655,8 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void SeekToPosition(Vector2 position)
     {
+        m_Arrive.m_Active = false;
+
         //Actually handles seeking to specific locations. Other states will call this.
         m_Seek.m_TargetPosition = position;
         m_Seek.m_Active = true;
@@ -574,6 +668,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     }
     void ArriveToPosition(Vector2 position)
     {
+        m_Seek.m_Active = false;
         //Actually handles seeking to specific locations. Other states will call this.
         m_Arrive.m_TargetPosition = position;
         m_Arrive.m_Active = true;

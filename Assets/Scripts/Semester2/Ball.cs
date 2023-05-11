@@ -119,4 +119,9 @@ public class Ball : MonoBehaviour, IBall
         return agent;
     }
 
+    public bool IsBallPossessed()
+    {
+        return isPossessed;
+    }
+
 }
