@@ -269,7 +269,7 @@ public class FootBallAgent : MovingEntity, IPlayer
                 Defend();
                 break;
             case PlayerState.Strike:
-                Debug.Log("Shouldn't be here, should only run from StrikeOrPass()");
+                Strike();
                 break;
             case PlayerState.GetOpen:
                 GetOpen();
@@ -364,7 +364,7 @@ public class FootBallAgent : MovingEntity, IPlayer
         goToPos = ownGoal.transform.position - markAgent.transform.position;
         if (Maths.Magnitude(goToPos) < minDefenceSlackValue)
         {
-            goToPos = goToPos * (defenceSlackPercent + 0.1f);
+            goToPos = goToPos * (defenceSlackPercent + 0.3f);
         }
 
         else
@@ -428,13 +428,13 @@ public class FootBallAgent : MovingEntity, IPlayer
             if (Vector2.Distance(this.transform.position, teammateToPass.transform.position) > 10f)
             {
                 Debug.Log(Vector2.Distance(this.transform.position, teammateToPass.transform.position));
-                Kick(posToLookAt - (Vector2)transform.position, kickPower * 2f);
+                Kick(posToLookAt - (Vector2)transform.position, kickPower * 2.2f);
             }
 
             else
             {
                 Debug.Log(Vector2.Distance(this.transform.position, teammateToPass.transform.position));
-                Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.2f);
+                Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.3f);
             }
 
 
@@ -512,7 +512,14 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     void GetOpen()
     {
-        if (!m_Seek.m_Active)
+        if (hasBall)
+        {
+            DisableAllMovement();
+            AssignState(PlayerState.StrikeOrPass);
+        }
+
+
+        if (!m_Seek.m_Active && !hasBall)
         {
             Vector2 randomOffset = new Vector2(0, 0);
 
@@ -537,9 +544,6 @@ public class FootBallAgent : MovingEntity, IPlayer
 
         SeekToPosition((Vector2)currentMapPoint.transform.position + randomOpenOffset);
 
-
-
-
         //Find random seek near the currentMapPoint.
 
         //Move towards it.
@@ -555,6 +559,7 @@ public class FootBallAgent : MovingEntity, IPlayer
     {
         if (!ballHolder)
         {
+            inStrikeOrPass = false;
             AssignState(PlayerState.Waiting);
         }
 
@@ -562,6 +567,9 @@ public class FootBallAgent : MovingEntity, IPlayer
         {
             return;
         }
+
+        DisableAllMovement();
+
         inStrikeOrPass = true;
 
         enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
@@ -582,19 +590,38 @@ public class FootBallAgent : MovingEntity, IPlayer
         {
             //currentTeamManager.StateCompleted(PlayerState.StrikeOrPass, false, this);
             inStrikeOrPass = false;
+            AssignState(PlayerState.Pass);
             return;
             //TELL THE MANAGER THAT IT FAILED.
         }
 
+        float distanceToGoal = Vector2.Distance(this.transform.position, enemyGoal.transform.position);
+
+        //If distanceToGoal > 7, then it is high.
+        //If targets count is bigger than 1, it is high.
+
+        float fDistance_Short = FuzzyLogic.ReverseGradient(distanceToGoal, 7.5f, 0.0f);
+
+        float fDistance_High = FuzzyLogic.Gradient(distanceToGoal, 6f, 15f);
+
+        float fTargetLow = FuzzyLogic.ReverseGradient((float)openTargets.Count, 1.5F, 0f);
+        float fTargetHigh = FuzzyLogic.Gradient((float)openTargets.Count, 4.0f, 1f);
+
+
+        Debug.Log("fuzzy: high then short");
+        Debug.Log(fDistance_High);
+        Debug.Log(fDistance_Short);
+
+
+        if (openTargets.Count > 0)
+        {
+            Strike();
+            currentPlayerState = PlayerState.Strike;
+            return;
+        }
+
+
         List<FootBallAgent> teammates = currentTeamManager.GetTeammates(this);
-
-
-
-
-        float r1 = openTargets.Count;
-        
-
-        
 
         //Fuzzy logic here.
 
@@ -612,18 +639,34 @@ public class FootBallAgent : MovingEntity, IPlayer
 
     }
 
-    void Strike(List<GameObject> openTargets)
+    void Strike()
     {
+        Debug.Log("b4 kick");
         //Actually kicking the ball at a goal to score.
         if (kickAimTimerTemp == kickAimTimer)
         {
+            enemyGoal.TryGetComponent(out IGoalNet IGoalNet);
+            GameObject[] targets = IGoalNet.GetAimTargets();
+            List<GameObject> openTargets = new List<GameObject>();
+
+            //For each target
+            for (int i = 0; i < targets.Length; i++)
+            {
+                //Check if there is nothing between the player and each target.
+                if (RaycastIsTargetOpen(enemyGoal, (Vector2)targets[i].transform.position))
+                {
+                    openTargets.Add(targets[i]);
+                }
+            }
+
             int randomIndex;
-            randomIndex = Random.Range(0, openTargets.Count - 1);
+            randomIndex = Random.Range(0, openTargets.Count);
             LookAtDirection(openTargets[randomIndex].transform.position);
         }
 
         if (kickAimTimerTemp <= 0)
         {
+            Debug.Log("kick");
             Kick(posToLookAt - (Vector2)transform.position, kickPower * 1.5f);
             kickAimTimerTemp = kickAimTimer;
             //TELL TEAMMANAGER HERE THAT YOU KICKED THE BALL.

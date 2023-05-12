@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class GoalNet : MonoBehaviour, IGoalNet
@@ -18,9 +19,22 @@ public class GoalNet : MonoBehaviour, IGoalNet
     {
         if (collision.gameObject.TryGetComponent(out IBall ball))
         {
-
+            StartCoroutine(EndGame());
         }
     }
+
+    IEnumerator EndGame()
+    {
+
+        yield return new WaitForSeconds(1);
+
+        SceneManager.LoadScene("Sem2Test", LoadSceneMode.Single);
+
+    }
+
+
+
+
 
     public void GoalScored(int teamNumber)
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class FuzzyLogic
@@ -20,7 +21,7 @@ public static class FuzzyLogic
         return 1.0f - a;
     }
 
-    public static float Gradient(float fValue, float fLow, float FHigh)
+    public static float Gradient(float fValue, float fLow, float fHigh)
     {
 
         if (fValue <= fLow)
@@ -28,14 +29,14 @@ public static class FuzzyLogic
             return 0.0f;
         }
 
-        else if (fValue >= FHigh)
+        else if (fValue >= fHigh)
         {
             return 1.0f;
         }
 
         else
         {
-            float fDifference = FHigh - fLow;
+            float fDifference = fHigh - fLow;
             if (fDifference == 0.0f)
             {
                 return 0.0f;
@@ -46,6 +47,7 @@ public static class FuzzyLogic
                 return ((fValue - fLow) / fDifference);
             }
         }
+        
 
     }
 

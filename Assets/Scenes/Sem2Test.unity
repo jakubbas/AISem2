@@ -3988,6 +3988,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 1
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &358812880
 CircleCollider2D:
@@ -5103,6 +5104,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 1
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &880532503
 CircleCollider2D:
@@ -14498,6 +14500,10 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1808924649, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
+      propertyPath: m_Radius
+      value: 0.12
+      objectReference: {fileID: 0}
     - target: {fileID: 8444165410975509859, guid: 156b3f055de43bd45aa3cbc78f688b41, type: 3}
       propertyPath: m_Name
       value: Ball
@@ -16506,6 +16512,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 0
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &1395899161
 CircleCollider2D:
@@ -17830,6 +17837,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 0
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &1645722436
 CircleCollider2D:
@@ -18137,6 +18145,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 2
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &1649483172
 CircleCollider2D:
@@ -18502,6 +18511,7 @@ MonoBehaviour:
   currentTeamManager: {fileID: 0}
   newMapPoint: {fileID: 0}
   role: 2
+  teammateToPass: {fileID: 0}
   detectionRadius: 50
 --- !u!58 &1741919908
 CircleCollider2D:
